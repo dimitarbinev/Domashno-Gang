@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,17 +15,73 @@ class _LoginPageState extends State<LoginPage> {
 
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  String role = 'parent'; // default role selector (optional)
 
-  String role = 'parent'; // parent or child
+  bool _loading = false;
 
-  void _login() {
-    if (_formKey.currentState!.validate()) {
-      if (role == 'parent') {
+  // Replace with your backend endpoint
+  final String backendUrl = 'https://your-backend.com/api/verify-token';
+
+Future<void> _login() async {
+  if (!_formKey.currentState!.validate()) return;
+
+  setState(() => _loading = true);
+
+  try {
+    // 1️⃣ Sign in with Firebase
+    final userCredential = await FirebaseAuth.instance
+        .signInWithEmailAndPassword(
+            email: emailController.text.trim(),
+            password: passwordController.text);
+
+    // 2️⃣ Get ID token from Firebase
+    final idToken = await userCredential.user!.getIdToken();
+
+    // 3️⃣ Send ID token to backend for verification
+    final response = await http.post(
+      Uri.parse(backendUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'idToken': idToken}),
+    );
+
+    final result = jsonDecode(response.body);
+
+    // ✅ Check if widget is still mounted before using context
+    if (!mounted) return;
+
+    if (response.statusCode == 200 && result['role'] != null) {
+      if (result['role'] == 'parent') {
         Navigator.pushReplacementNamed(context, '/');
       } else {
         Navigator.pushReplacementNamed(context, '/child-home');
       }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result['message'] ?? 'Login failed')),
+      );
     }
+  } on FirebaseAuthException catch (e) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(e.message ?? 'Login failed')),
+    );
+  } catch (e) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('An error occurred')),
+    );
+  } finally {
+  if (mounted) {
+    setState(() => _loading = false);
+  }
+}
+}
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -40,7 +99,6 @@ class _LoginPageState extends State<LoginPage> {
                   'EaseFlow Login',
                   style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                 ),
-
                 const SizedBox(height: 40),
 
                 // EMAIL
@@ -53,7 +111,6 @@ class _LoginPageState extends State<LoginPage> {
                   validator: (value) =>
                       value!.isEmpty ? 'Enter email' : null,
                 ),
-
                 const SizedBox(height: 20),
 
                 // PASSWORD
@@ -67,42 +124,24 @@ class _LoginPageState extends State<LoginPage> {
                   validator: (value) =>
                       value!.length < 6 ? 'Min 6 characters' : null,
                 ),
-
                 const SizedBox(height: 20),
-
-                // ROLE SELECTOR
-                DropdownButtonFormField<String>(
-                  value: role,
-                  items: const [
-                    DropdownMenuItem(
-                        value: 'parent', child: Text('Parent')),
-                    DropdownMenuItem(
-                        value: 'child', child: Text('Child')),
-                  ],
-                  onChanged: (value) => setState(() => role = value!),
-                  decoration: const InputDecoration(
-                    labelText: 'Login as',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-
-                const SizedBox(height: 30),
 
                 // LOGIN BUTTON
                 SizedBox(
                   width: double.infinity,
                   height: 50,
-                  child: ElevatedButton(
-                    onPressed: _login,
-                    child: const Text('Login'),
-                  ),
+                  child: _loading
+                      ? const Center(child: CircularProgressIndicator())
+                      : ElevatedButton(
+                          onPressed: _login,
+                          child: const Text('Login'),
+                        ),
                 ),
-
                 const SizedBox(height: 16),
 
+                // GO TO SIGNUP
                 TextButton(
-                  onPressed: () =>
-                      Navigator.pushNamed(context, '/signup'),
+                  onPressed: () => Navigator.pushNamed(context, '/signup'),
                   child: const Text("Don't have an account? Sign up"),
                 ),
               ],
