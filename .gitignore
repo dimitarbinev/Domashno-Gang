@@ -210,3 +210,5 @@ node_modules/
 package-lock.json
 package.json
 serviceAccountKey.json
+google-services.json
+tsconfig.json
