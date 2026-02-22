@@ -219,7 +219,7 @@ class _PersonInfoPageState extends State<PersonInfoPage> {
 
               // Tone Dropdown
               DropdownButtonFormField<String>(
-                value: selectedTone,
+                initialValue: selectedTone,
                 decoration: const InputDecoration(
                   labelText: 'Tone',
                   border: OutlineInputBorder(),
