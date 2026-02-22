@@ -62,7 +62,7 @@ export const sign_up = catch_async(async (req: Request, res: Response) => {
        }
 })
 
-export const login = catch_async(async (req: Request, res: Response) => {
+export const getProfile = catch_async(async (req: Request, res: Response) => {
     const uid = req.user?.uid as string;
 
     const doc = await db.collection('users').doc(uid).get()
