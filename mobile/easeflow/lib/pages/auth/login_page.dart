@@ -14,50 +14,59 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-  String role = 'guardian'; // default role
+
   bool _loading = false;
 
-  // Replace with your backend endpoint
-  final String backendUrl = 'https://jamie-subsatirical-abbreviatedly.ngrok-free.dev/auth/login';
+  // ✅ IMPORTANT — use your REAL endpoint
+  final String backendUrl =
+      'https://jamie-subsatirical-abbreviatedly.ngrok-free.dev/auth/me';
 
   Future<void> _login() async {
-    // ✅ Safe validation
     if (_formKey.currentState?.validate() != true) return;
 
     setState(() => _loading = true);
 
     try {
-      // 1️⃣ Sign in with Firebase
-      final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      // 🔐 1. Firebase login
+      final userCredential =
+          await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text,
       );
 
-      // 2️⃣ Get Firebase ID token
+      // 🎫 2. Get ID token
       final idToken = await userCredential.user?.getIdToken();
       if (idToken == null) throw Exception("Failed to get ID token");
 
-      // 3️⃣ Send token to backend for verification
-      final response = await http.post(
+      // 🌐 3. Call backend
+      final response = await http.get(
         Uri.parse(backendUrl),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'idToken': idToken}),
+        headers: {
+          "Authorization": "Bearer $idToken",
+          "Content-Type": "application/json",
+        },
       );
 
       if (!mounted) return;
 
-      final result = jsonDecode(response.body);
+      // 🚨 PROTECTION: avoid HTML crash
+      if (!response.headers['content-type']!.contains('application/json')) {
+        throw Exception(
+            "Backend returned HTML instead of JSON.\nStatus: ${response.statusCode}\nBody: ${response.body.substring(0, 80)}");
+      }
 
-      if (response.statusCode == 200 && result['role'] != null) {
-        // ✅ Navigate based on role returned by backend
-        if (result['role'] == 'guardian') {
+      final profile = jsonDecode(response.body);
+
+      // ✅ Success
+      if (response.statusCode == 200) {
+        if (profile['role'] == 'guardian') {
           Navigator.pushReplacementNamed(context, '/');
         } else {
           Navigator.pushReplacementNamed(context, '/child-home');
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(result['message'] ?? 'Login failed')),
+          SnackBar(content: Text(profile['message'] ?? 'Login failed')),
         );
       }
     } on FirebaseAuthException catch (e) {
@@ -68,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('An error occurred: $e')),
+        SnackBar(content: Text('Login error: $e')),
       );
     } finally {
       if (mounted) setState(() => _loading = false);
@@ -85,6 +94,8 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
+      backgroundColor: Colors.black,    
       body: SafeArea(
         child: SingleChildScrollView(
           child: SizedBox(
@@ -100,7 +111,9 @@ class _LoginPageState extends State<LoginPage> {
                       const Text(
                         'EaseFlow Login',
                         style: TextStyle(
-                            fontSize: 32, fontWeight: FontWeight.bold),
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       const SizedBox(height: 40),
 
@@ -112,7 +125,9 @@ class _LoginPageState extends State<LoginPage> {
                           border: OutlineInputBorder(),
                         ),
                         validator: (value) =>
-                            value == null || value.isEmpty ? 'Enter email' : null,
+                            value == null || value.isEmpty
+                                ? 'Enter email'
+                                : null,
                       ),
                       const SizedBox(height: 20),
 
@@ -124,26 +139,10 @@ class _LoginPageState extends State<LoginPage> {
                           labelText: 'Password',
                           border: OutlineInputBorder(),
                         ),
-                        validator: (value) => value == null || value.length < 6
-                            ? 'Min 6 characters'
-                            : null,
-                      ),
-                      const SizedBox(height: 20),
-
-                      // ROLE SELECTOR
-                      DropdownButtonFormField<String>(
-                        initialValue: role,
-                        items: const [
-                          DropdownMenuItem(value: 'guardian', child: Text('Guardian')),
-                          DropdownMenuItem(value: 'child', child: Text('Child')),
-                        ],
-                        onChanged: (value) {
-                          if (value != null) setState(() => role = value);
-                        },
-                        decoration: const InputDecoration(
-                          labelText: 'Login as',
-                          border: OutlineInputBorder(),
-                        ),
+                        validator: (value) =>
+                            value == null || value.length < 6
+                                ? 'Min 6 characters'
+                                : null,
                       ),
                       const SizedBox(height: 30),
 
@@ -152,7 +151,8 @@ class _LoginPageState extends State<LoginPage> {
                         width: double.infinity,
                         height: 50,
                         child: _loading
-                            ? const Center(child: CircularProgressIndicator())
+                            ? const Center(
+                                child: CircularProgressIndicator())
                             : ElevatedButton(
                                 onPressed: _login,
                                 child: const Text('Login'),
@@ -160,10 +160,12 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 16),
 
-                      // GO TO SIGNUP
+                      // SIGNUP
                       TextButton(
-                        onPressed: () => Navigator.pushNamed(context, '/signup'),
-                        child: const Text("Don't have an account? Sign up"),
+                        onPressed: () =>
+                            Navigator.pushNamed(context, '/signup'),
+                        child:
+                            const Text("Don't have an account? Sign up"),
                       ),
                     ],
                   ),

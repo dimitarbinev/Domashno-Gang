@@ -45,6 +45,19 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+        themeMode: ThemeMode.dark, // 🔥 IMPORTANT
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.teal,
+            brightness: Brightness.dark,
+          ),
+        ),
+        darkTheme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.teal,
+            brightness: Brightness.dark,
+          ),
+        ),
       initialRoute: '/login',
       routes: {
         '/login': (context) => const LoginPage(),
@@ -55,11 +68,11 @@ class MainApp extends StatelessWidget {
 
         // Child pages
         '/child-home': (context) => ChildHomePage(),
-        '/child-tasks': (context) => ChildTasksPage(tasks: tasks),
+        '/child-tasks': (context) => const ChildTasksPage(),
 
         // Parent task pages
         '/create-task': (context) => CreateTaskPage(tasks: tasks),
-        '/manage-tasks': (context) => ManageTasksPage(tasks: tasks),
+        '/manage-tasks': (context) => ManageTasksPage(),
 
         '/person-info': (context) => PersonInfoPage(),
         '/settings': (context) => SettingsPage(),
