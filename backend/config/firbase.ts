@@ -8,6 +8,7 @@ admin.initializeApp({
 const db = admin.firestore()
 const auth = admin.auth()
 const webApiKey = process.env.FIREBASE_WEB_API_KEY
+const FieldValue = admin.firestore.FieldValue;
 
-export { db, auth, webApiKey }
+export { db, auth, webApiKey, FieldValue }
 export default db
