@@ -17,15 +17,19 @@ class _ManageTasksPageState extends State<ManageTasksPage> {
   bool _loading = true;
 
   // 🔥 Your backend endpoints
-  final String backendGetTasks =
-      'https://jamie-subsatirical-abbreviatedly.ngrok-free.dev/tasks/get_tasks';
-  final String backendCreateTask =
-      'https://jamie-subsatirical-abbreviatedly.ngrok-free.dev/tasks/create_task';
+  final String baseUrl =
+      'https://jamie-subsatirical-abbreviatedly.ngrok-free.dev/tasks/';
 
   @override
   void initState() {
     super.initState();
     _fetchTasks();
+  }
+
+  Future<String> _getChildUid() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) throw Exception("User not logged in");
+    return user.uid;
   }
 
 Future<String> _getIdToken() async {
@@ -42,9 +46,10 @@ Future<String> _getIdToken() async {
     setState(() => _loading = true);
     try {
       final idToken = await _getIdToken();
+      final childUid = 'eASi4zyuhpbvzoAc3C308mE0zQ33';
 
       final response = await http.get(
-        Uri.parse(backendGetTasks),
+        Uri.parse('${baseUrl}child/$childUid'),
         headers: {
           "Authorization": "Bearer $idToken",
           "Content-Type": "application/json",
@@ -89,7 +94,7 @@ Future<String> _getIdToken() async {
       final idToken = await _getIdToken();
 
       final response = await http.post(
-        Uri.parse(backendCreateTask),
+        Uri.parse(baseUrl),
         headers: {
           "Authorization": "Bearer $idToken",
           "Content-Type": "application/json",

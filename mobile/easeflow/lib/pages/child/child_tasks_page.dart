@@ -17,8 +17,8 @@ class _ChildTasksPageState extends State<ChildTasksPage> {
   bool _loading = true;
   List<TaskModel> _tasks = [];
 
-  final String backendUrl =
-      'https://jamie-subsatirical-abbreviatedly.ngrok-free.dev/tasks/get_tasks';
+  final String baseUrl=
+      'https://jamie-subsatirical-abbreviatedly.ngrok-free.dev/tasks';
 
   @override
   void initState() {
@@ -28,17 +28,18 @@ class _ChildTasksPageState extends State<ChildTasksPage> {
 
   Future<void> _fetchTasks() async {
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw Exception("User not logged in");
-      final idToken = await user.getIdToken();
+        final user = FirebaseAuth.instance.currentUser;
+        if (user == null) throw Exception("User not logged in");
+        final idToken = await user.getIdToken();
+        final childUid = user.uid; // <-- define childUid here
 
-      final response = await http.get(
-        Uri.parse(backendUrl),
-        headers: {
-          "Authorization": "Bearer $idToken",
-          "Content-Type": "application/json",
-        },
-      );
+        final response = await http.get(
+          Uri.parse('$baseUrl/child/$childUid'), // <-- use childUid
+          headers: {
+            "Authorization": "Bearer $idToken",
+            "Content-Type": "application/json",
+          },
+        );
 
       if (response.statusCode != 200) {
         throw Exception(
