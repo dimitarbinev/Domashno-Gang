@@ -15,12 +15,7 @@ dependencies:
   firebase_auth: ^6.1.4    # compatible with firebase_core 2.x
   http: ^1.1.0
 
-  # Firebase
-  firebase_core: ^4.4.0
-  firebase_auth: ^6.1.4
 
-  # HTTP requests to backend
-  http: ^1.1.0
   
 dev_dependencies:
   flutter_test:

@@ -1,4 +1,8 @@
+// lib/pages/auth/signup_page.dart
+
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -16,43 +20,79 @@ class _SignupPageState extends State<SignupPage> {
   final confirmController = TextEditingController();
   final guardianIdController = TextEditingController();
 
-  String role = 'parent'; // parent or child
+  String role = 'guardian'; // parent or child
+  bool _loading = false;
 
-  void _signup() {
-    if (_formKey.currentState!.validate()) {
-      // Collect data
-      final displayName = displayNameController.text.trim();
-      final email = emailController.text.trim();
-      final password = passwordController.text;
-      final guardianId = role == 'child' ? guardianIdController.text.trim() : null;
+  // Replace with your backend endpoint
+  final String backendUrl = 'https://jamie-subsatirical-abbreviatedly.ngrok-free.dev/auth/sign_up';
 
-      // print('Signup Info:');
-      // print('Display Name: $displayName');
-      // print('Email: $email');
-      // print('Password: $password');
-      // print('Role: $role');
-      // if (guardianId != null) print('Guardian ID: $guardianId');
+  Future<void> _signup() async {
+    if (!_formKey.currentState!.validate()) return;
 
-      // Navigate to proper home
-      if (role == 'parent') {
-        Navigator.pushReplacementNamed(context, '/');
+    setState(() => _loading = true);
+
+    try {
+      final payload = {
+        'displayName': displayNameController.text.trim(),
+        'email': emailController.text.trim(),
+        'password': passwordController.text,
+        'role': role,
+        if (role == 'child') 'guardianId': guardianIdController.text.trim(),
+      };
+
+      final response = await http.post(
+        Uri.parse(backendUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(payload),
+      );
+
+      final result = jsonDecode(response.body);
+
+      if (!mounted) return;
+
+      if (response.statusCode == 200) {
+        // Success: navigate based on role
+        if (role == 'guardian') {
+          Navigator.pushReplacementNamed(context, '/');
+        } else {
+          Navigator.pushReplacementNamed(context, '/child-home');
+        }
       } else {
-        Navigator.pushReplacementNamed(context, '/child-home');
+        // Show backend error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result['message'] ?? 'Signup failed')),
+        );
       }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
+  }
+
+  @override
+  void dispose() {
+    displayNameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    confirmController.dispose();
+    guardianIdController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView( // scroll if keyboard appears
+        child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: Form(
               key: _formKey,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const SizedBox(height: 40),
                   const Text(
@@ -106,17 +146,18 @@ class _SignupPageState extends State<SignupPage> {
                       labelText: 'Confirm Password',
                       border: OutlineInputBorder(),
                     ),
-                    validator: (value) => value != passwordController.text
-                        ? 'Passwords do not match'
-                        : null,
+                    validator: (value) =>
+                        value != passwordController.text
+                            ? 'Passwords do not match'
+                            : null,
                   ),
                   const SizedBox(height: 20),
 
-                  // ROLE
+                  // ROLE SELECTOR
                   DropdownButtonFormField<String>(
-                    value: role,
+                    initialValue: role,
                     items: const [
-                      DropdownMenuItem(value: 'parent', child: Text('Parent')),
+                      DropdownMenuItem(value: 'guardian', child: Text('Guardian')),
                       DropdownMenuItem(value: 'child', child: Text('Child')),
                     ],
                     onChanged: (value) => setState(() => role = value!),
@@ -141,34 +182,17 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                   if (role == 'child') const SizedBox(height: 20),
 
-<<<<<<< Updated upstream
                   // SIGNUP BUTTON
                   SizedBox(
                     width: double.infinity,
                     height: 50,
-                    child: ElevatedButton(
-                      onPressed: _signup,
-                      child: const Text('Create Account'),
-                    ),
-=======
-                const SizedBox(height: 20),
-
-                // ROLE
-                DropdownButtonFormField<String>(
-                  initialValue: role,
-                  items: const [
-                    DropdownMenuItem(
-                        value: 'parent', child: Text('Parent')),
-                    DropdownMenuItem(
-                        value: 'child', child: Text('Child')),
-                  ],
-                  onChanged: (value) => setState(() => role = value!),
-                  decoration: const InputDecoration(
-                    labelText: 'Register as',
-                    border: OutlineInputBorder(),
->>>>>>> Stashed changes
+                    child: _loading
+                        ? const Center(child: CircularProgressIndicator())
+                        : ElevatedButton(
+                            onPressed: _signup,
+                            child: const Text('Create Account'),
+                          ),
                   ),
-
                   const SizedBox(height: 16),
 
                   TextButton(

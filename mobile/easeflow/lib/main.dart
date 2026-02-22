@@ -21,10 +21,19 @@ final List<TaskModel> tasks = [];
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables
   await dotenv.load(fileName: ".env");
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  // Initialize Firebase
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    print("Firebase initialized successfully!");
+  } catch (e) {
+    print("Firebase initialization failed: $e");
+  }
 
   runApp(const MainApp());
 }
@@ -33,71 +42,7 @@ class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
   @override
-  State<MainApp> createState() => _MainAppState();
-}
-
-class _MainAppState extends State<MainApp> {
-  late final Future<FirebaseApp> _firebaseInit;
-
-  @override
-  void initState() {
-    super.initState();
-    _firebaseInit = Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
-<<<<<<< Updated upstream
-    return FutureBuilder(
-      future: _firebaseInit,
-      builder: (context, snapshot) {
-        // Error initializing Firebase
-        if (snapshot.hasError) {
-          return MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: Text(
-                  'Error initializing Firebase:\n${snapshot.error}',
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
-          );
-        }
-
-        // Firebase is ready
-        if (snapshot.connectionState == ConnectionState.done) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            initialRoute: '/login',
-            routes: {
-              '/login': (context) => const LoginPage(),
-              '/signup': (context) => const SignupPage(),
-              '/': (context) => const HomePage(),
-              '/child-home': (context) => const ChildHomePage(),
-              '/create-task': (context) => const CreateTaskPage(),
-              '/manage-tasks': (context) => const ManageTasksPage(),
-              '/person-info': (context) => const PersonInfoPage(),
-              '/settings': (context) => const SettingsPage(),
-            },
-            theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(
-                seedColor: Colors.teal,
-                brightness: Brightness.dark,
-              ),
-            ),
-          );
-        }
-
-        // Loading Firebase
-        return const MaterialApp(
-          home: Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          ),
-        );
-=======
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       initialRoute: '/login',
@@ -105,18 +50,19 @@ class _MainAppState extends State<MainApp> {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => SignupPage(),
 
-        '/': (context) => HomePage(), // parent home
+        // Parent home
+        '/': (context) => HomePage(),
+
+        // Child pages
         '/child-home': (context) => ChildHomePage(),
-        // Pass shared tasks to child tasks page
         '/child-tasks': (context) => ChildTasksPage(tasks: tasks),
 
         // Parent task pages
         '/create-task': (context) => CreateTaskPage(tasks: tasks),
         '/manage-tasks': (context) => ManageTasksPage(tasks: tasks),
-        
+
         '/person-info': (context) => PersonInfoPage(),
         '/settings': (context) => SettingsPage(),
->>>>>>> Stashed changes
       },
     );
   }
