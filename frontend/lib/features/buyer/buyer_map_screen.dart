@@ -31,14 +31,14 @@ class _BuyerMapScreenState extends State<BuyerMapScreen> {
                 infoWindow: InfoWindow(
                   title: m.sellerName,
                   snippet: '${m.city} · ★ ${m.rating}',
-              onTap: () => _showSellerSheet(context, m),
+                  onTap: () => _showSellerSheet(context, m),
                 ),
                 icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
               );
             }).toSet(),
             myLocationEnabled: true,
             zoomControlsEnabled: false,
-              ),
+          ),
 
           // Top search bar
           Positioned(
