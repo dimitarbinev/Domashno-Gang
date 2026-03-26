@@ -62,7 +62,7 @@ export const listingConfirmation = catch_async(async (req: Request, res: Respons
         date,
         startTime,
         endTime,
-        status: Status.confirmed,
+        status: Status.active,
         updatedAt: new Date()
     })
 

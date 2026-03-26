@@ -245,7 +245,7 @@ class SellerListingDetailScreen extends ConsumerWidget {
                       await ref.read(productServiceProvider).updateListingStatus(
                         productId: listing.productId,
                         listingId: listing.id,
-                        status: 1, // Confirmed / Active
+                        status: 2, // Confirmed GO!
                       );
                       // Refresh listings
                       ref.invalidate(sellerListingsProvider(user.uid));
@@ -267,7 +267,7 @@ class SellerListingDetailScreen extends ConsumerWidget {
                       await ref.read(productServiceProvider).updateListingStatus(
                         productId: listing.productId,
                         listingId: listing.id,
-                        status: 2, // Cancelled
+                        status: 3, // Cancelled
                       );
                       // Refresh listings
                       ref.invalidate(sellerListingsProvider(user.uid));

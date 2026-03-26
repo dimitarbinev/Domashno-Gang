@@ -217,7 +217,7 @@ class Listing {
       depositsTotal: (json['depositsTotal'] as num?)?.toDouble() ?? 0.0,
       status: json['status'] is int
           ? _mapStatus(json['status'] as int)
-          : json['status'] as String? ?? 'draft',
+          : json['status'] as String? ?? 'active',
       goDecision: json['goDecision'] as bool?,
       sellerName: json['sellerName'] as String?,
       sellerPhotoUrl: json['sellerPhotoUrl'] as String?,
@@ -229,10 +229,12 @@ class Listing {
   static String _mapStatus(int status) {
     switch (status) {
       case 0:
-        return 'pending'; // Draft or Pending
+        return 'pending'; // Draft/Pending
       case 1:
-        return 'active';  // Confirmed/Visible to buyers
+        return 'active'; // Initial Active state
       case 2:
+        return 'confirmed'; // Confirmed GO!
+      case 3:
         return 'cancelled';
       default:
         return 'draft';

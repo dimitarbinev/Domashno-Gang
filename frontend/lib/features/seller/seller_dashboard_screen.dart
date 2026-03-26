@@ -89,9 +89,9 @@ class SellerDashboardScreen extends ConsumerWidget {
               // Summary Cards
               ref.watch(sellerListingsProvider(userId)).when(
                 data: (listings) {
-                  final activeCount = listings.where((l) => l.status == 'active').length;
+                  final activeCount = listings.where((l) => l.status == 'active' || l.status == 'confirmed').length;
                   final totalRequested = listings.fold<double>(0, (sum, l) => sum + l.requestedQuantity);
-                  final pendingDecisions = listings.where((l) => l.status == 'threshold_reached' && l.goDecision == null).length;
+                  final pendingDecisions = listings.where((l) => (l.status == 'threshold_reached' || l.status == 'active') && l.requestedQuantity >= l.minThreshold).length;
 
                   return Column(
                     children: [
