@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../core/constants.dart';
+import '../../shared/providers/providers.dart';
 
-class BuyerOnboardingScreen extends StatefulWidget {
+class BuyerOnboardingScreen extends ConsumerStatefulWidget {
   const BuyerOnboardingScreen({super.key});
 
   @override
-  State<BuyerOnboardingScreen> createState() => _BuyerOnboardingScreenState();
+  ConsumerState<BuyerOnboardingScreen> createState() => _BuyerOnboardingScreenState();
 }
 
-class _BuyerOnboardingScreenState extends State<BuyerOnboardingScreen> {
+class _BuyerOnboardingScreenState extends ConsumerState<BuyerOnboardingScreen> {
   final _nameController = TextEditingController();
   String? _selectedCity;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -20,9 +23,45 @@ class _BuyerOnboardingScreenState extends State<BuyerOnboardingScreen> {
     super.dispose();
   }
 
-  void _handleComplete() {
-    // TODO: Save buyer profile to Firestore
-    context.go('/buyer/home');
+  Future<void> _handleComplete() async {
+    final name = _nameController.text.trim();
+    final city = _selectedCity;
+
+    if (name.isEmpty || city == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final regData = ref.read(registrationDataProvider);
+      
+      await ref.read(authServiceProvider).signUp(
+        name: name,
+        email: regData['email']!,
+        password: regData['password']!,
+        role: regData['role']!,
+        preferredCity: city,
+      );
+
+      if (mounted) {
+        ref.read(registrationDataProvider.notifier).clear();
+        context.go('/buyer/home');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Registration failed: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -93,12 +132,21 @@ class _BuyerOnboardingScreenState extends State<BuyerOnboardingScreen> {
                         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                       ),
                       child: ElevatedButton(
-                        onPressed: _handleComplete,
+                        onPressed: _isLoading ? null : _handleComplete,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
                         ),
-                        child: const Text('Start Exploring'),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('Start Exploring'),
                       ),
                     ),
                   ],

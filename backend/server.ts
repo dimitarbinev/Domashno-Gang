@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(cors());
 app.use("/auth", authRoutes);
 
-        
+
 app.listen(PORT, () => {
     console.log(`App is listening on ${PORT}`);
 })
