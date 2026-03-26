@@ -68,3 +68,11 @@ export const listingConfirmation = catch_async(async (req: Request, res: Respons
 
     return res.status(200).json({message: "Listing confirmed successfully"})
 })
+
+export const getProducts = catch_async(async (req: Request, res: Response) => {
+    const uid = req.user?.uid as string;
+    const snapshot = await db.collection("users").doc(uid).collection('products').get();
+    const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+    return res.status(200).json(products);
+});
