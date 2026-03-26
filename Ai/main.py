@@ -19,7 +19,8 @@ firebase_available = False
 try:
     # Check if already initialized to prevent ValueError during development server reloads
     if not firebase_admin._apps:
-        cred = credentials.Certificate("your-service-account-file.json")
+        # Point to the actual key in the backend directory
+        cred = credentials.Certificate("../backend/serviceAccountKey.json")
         firebase_admin.initialize_app(cred)
     db = firestore.client()
     firebase_available = True

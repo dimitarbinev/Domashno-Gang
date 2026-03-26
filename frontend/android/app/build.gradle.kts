@@ -31,6 +31,13 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        val secretsFile = rootProject.file("secrets.properties")
+        val secrets = java.util.Properties()
+        if (secretsFile.exists()) {
+            secrets.load(java.io.FileInputStream(secretsFile))
+        }
+        manifestPlaceholders["MAPS_API_KEY"] = secrets.getProperty("MAPS_API_KEY") ?: ""
     }
 
     buildTypes {
