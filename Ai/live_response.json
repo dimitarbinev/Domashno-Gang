@@ -1,0 +1,21 @@
+{
+  "options": [
+    {
+      "option_id": 1,
+      "name": "Best Route",
+      "ordered_stops": [
+        "Stara Zagora",
+        "Burgas"
+      ],
+      "total_travel_hours": 2.95,
+      "total_distance_km": 271.72,
+      "expected_sell_qty_kg": 350.0,
+      "expected_revenue_bgn": 875.0,
+      "estimated_travel_cost_bgn": 44.23,
+      "estimated_profit_bgn": 830.77,
+      "is_profitable": true
+    }
+  ],
+  "best_option": 1,
+  "message": "1 route option(s) generated. Choose the best for your needs."
+}

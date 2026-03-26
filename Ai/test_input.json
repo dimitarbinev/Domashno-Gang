@@ -1,0 +1,21 @@
+{
+  "seller_lat": 42.19055323682844,
+  "seller_lng": 24.33327671129756,
+  "price_per_kg": 2.50,
+  "available_qty": 500.0,
+  "cost_per_hour": 15.0,
+  "cities": [
+    {
+      "name": "Sofia",
+      "lat": 42.6977,
+      "lng": 23.3219,
+      "requested_qty": 100.0
+    },
+    {
+      "name": "Plovdiv",
+      "lat": 42.149981071685104,
+      "lng": 24.756219270699923,
+      "requested_qty": 200.0
+    }
+  ]
+}

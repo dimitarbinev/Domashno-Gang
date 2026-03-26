@@ -33,7 +33,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
   void _handleSave() {
     // TODO: Save product to Firestore
-    context.pop();
+    context.go('/seller/dashboard');
   }
 
   @override
@@ -42,7 +42,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.pop(),
+          onPressed: () => context.go('/seller/dashboard'),
         ),
         title: const Text('Add Product'),
       ),

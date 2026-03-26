@@ -3,6 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
+import '../services/auth_service.dart';
+
+// ─── Service Providers ───
+final authServiceProvider = Provider<AuthService>((ref) => AuthService());
 
 // ─── Firebase Instance Providers ───
 final firebaseAuthProvider = Provider<FirebaseAuth>(
@@ -31,6 +35,20 @@ class UserRoleNotifier extends Notifier<String?> {
 }
 
 final userRoleProvider = NotifierProvider<UserRoleNotifier, String?>(UserRoleNotifier.new);
+
+// ─── Registration Data ───
+class RegistrationDataNotifier extends Notifier<Map<String, String>> {
+  @override
+  Map<String, String> build() => {};
+
+  void updateData(Map<String, String> data) {
+    state = {...state, ...data};
+  }
+
+  void clear() => state = {};
+}
+
+final registrationDataProvider = NotifierProvider<RegistrationDataNotifier, Map<String, String>>(RegistrationDataNotifier.new);
 
 // ─── Current Seller Profile ───
 final currentSellerProvider = FutureProvider<Seller?>((ref) {

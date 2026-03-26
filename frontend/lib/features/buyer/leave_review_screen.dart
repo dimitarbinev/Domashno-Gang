@@ -27,7 +27,7 @@ class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.pop(),
+          onPressed: () => context.go('/buyer/home'),
         ),
         title: const Text('Leave Review'),
       ),
@@ -100,7 +100,7 @@ class _LeaveReviewScreenState extends State<LeaveReviewScreen> {
               child: ElevatedButton(
                 onPressed: _rating > 0 ? () {
                   // TODO: Submit to Firestore
-                  context.pop();
+                  context.go('/buyer/home');
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: const Text('Review submitted! Thank you.'),

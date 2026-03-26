@@ -23,7 +23,7 @@ class SellerListingDetailScreen extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.pop(),
+          onPressed: () => context.go('/seller/dashboard'),
         ),
         title: const Text('Listing Details'),
         actions: [
