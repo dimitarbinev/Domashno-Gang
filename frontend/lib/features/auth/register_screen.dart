@@ -12,7 +12,6 @@ class RegisterScreen extends ConsumerStatefulWidget {
 }
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
-  final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -22,7 +21,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   void dispose() {
-    _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
@@ -32,12 +30,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _handleRegister() async {
     if (_selectedRole == null) return;
     
-    final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
 
-    if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
+    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all fields')),
       );
@@ -51,8 +48,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       return;
     }
 
+
     ref.read(registrationDataProvider.notifier).updateData({
-      'name': name,
       'email': email,
       'password': password,
       'role': _selectedRole!,
@@ -138,16 +135,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    TextField(
-                      controller: _nameController,
-                      keyboardType: TextInputType.name,
-                      style: const TextStyle(color: AppTheme.textPrimary),
-                      decoration: const InputDecoration(
-                        labelText: 'Full Name',
-                        prefixIcon: Icon(Icons.person_outline, size: 20),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
                     TextField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,

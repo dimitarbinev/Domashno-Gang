@@ -95,6 +95,38 @@ class AuthService {
     }
   }
 
+  Future<void> switchRole(String newRole) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No authenticated user found');
+
+    final idToken = await user.getIdToken();
+    if (idToken == null) throw Exception("Failed to get ID token");
+
+    final cleanBaseUrl = _baseUrl.endsWith('/') ? _baseUrl.substring(0, _baseUrl.length - 1) : _baseUrl;
+    final url = Uri.parse('$cleanBaseUrl/auth/change_role');
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $idToken',
+      },
+      body: jsonEncode({'role': newRole}),
+    );
+
+    if (response.headers['content-type']?.contains('application/json') != true) {
+      throw Exception(
+        "Backend returned HTML instead of JSON.\nStatus: ${response.statusCode}\nBody: ${response.body.substring(0, 80)}",
+      );
+    }
+
+    final result = jsonDecode(response.body);
+
+    if (response.statusCode != 200) {
+      throw Exception(result['message'] ?? 'Failed to switch role');
+    }
+  }
+
   Future<void> createSellerProfile({
     required String name,
     required String mainCity,

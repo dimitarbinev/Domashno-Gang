@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../shared/widgets/rating_stars.dart';
+import '../../shared/providers/providers.dart';
 
-class SellerProfileScreen extends StatelessWidget {
+class SellerProfileScreen extends ConsumerWidget {
   const SellerProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -67,6 +69,24 @@ class SellerProfileScreen extends StatelessWidget {
               _MenuItem(icon: Icons.inventory_2_outlined, label: 'My Products', onTap: () {}),
               _MenuItem(icon: Icons.history, label: 'Order History', onTap: () {}),
               _MenuItem(icon: Icons.settings_outlined, label: 'Settings', onTap: () {}),
+              _MenuItem(
+                icon: Icons.shopping_bag_outlined,
+                label: 'Switch to Buyer',
+                onTap: () async {
+                  try {
+                    await ref.read(userRoleProvider.notifier).switchRole('buyer');
+                    if (context.mounted) {
+                      context.go('/buyer/home');
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to switch role: $e')),
+                      );
+                    }
+                  }
+                },
+              ),
               _MenuItem(
                 icon: Icons.logout,
                 label: 'Sign Out',

@@ -14,20 +14,23 @@ class BuyerOnboardingScreen extends ConsumerStatefulWidget {
 
 class _BuyerOnboardingScreenState extends ConsumerState<BuyerOnboardingScreen> {
   final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
   String? _selectedCity;
   bool _isLoading = false;
 
   @override
   void dispose() {
     _nameController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
   Future<void> _handleComplete() async {
     final name = _nameController.text.trim();
+    final phone = _phoneController.text.trim();
     final city = _selectedCity;
 
-    if (name.isEmpty || city == null) {
+    if (name.isEmpty || city == null || phone.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in all fields')),
       );
@@ -45,6 +48,7 @@ class _BuyerOnboardingScreenState extends ConsumerState<BuyerOnboardingScreen> {
         password: regData['password']!,
         role: regData['role']!,
         preferredCity: city,
+        phoneNumber: phone,
       );
 
       if (mounted) {
@@ -123,6 +127,16 @@ class _BuyerOnboardingScreenState extends ConsumerState<BuyerOnboardingScreen> {
                           .map((c) => DropdownMenuItem(value: c, child: Text(c)))
                           .toList(),
                       onChanged: (v) => setState(() => _selectedCity = v),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      style: const TextStyle(color: AppTheme.textPrimary),
+                      decoration: const InputDecoration(
+                        labelText: 'Phone Number',
+                        prefixIcon: Icon(Icons.phone_outlined, size: 20),
+                      ),
                     ),
                     const SizedBox(height: 28),
                     Container(

@@ -34,6 +34,11 @@ class UserRoleNotifier extends Notifier<String?> {
   String? build() => null;
 
   void setRole(String? role) => state = role;
+
+  Future<void> switchRole(String newRole) async {
+    await ref.read(authServiceProvider).switchRole(newRole);
+    state = newRole;
+  }
 }
 
 final userRoleProvider = NotifierProvider<UserRoleNotifier, String?>(UserRoleNotifier.new);
