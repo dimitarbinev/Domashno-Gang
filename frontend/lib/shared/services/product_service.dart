@@ -130,6 +130,31 @@ class ProductService {
     }
   }
 
+  Future<List<Listing>> getAvailableListings() async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No authenticated user found');
+
+    final idToken = await user.getIdToken();
+    if (idToken == null) throw Exception('Failed to retrieve authentication token');
+
+    final cleanBaseUrl = _baseUrl.endsWith('/') ? _baseUrl.substring(0, _baseUrl.length - 1) : _baseUrl;
+    final url = Uri.parse('$cleanBaseUrl/buyer/available_listings');
+
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $idToken',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load available listings: ${response.body}');
+    }
+
+    final List<dynamic> data = jsonDecode(response.body);
+    return data.map((item) => Listing.fromJson(item, item['id'] ?? '')).toList();
+  }
+
   Future<void> updateListingStatus({
     required String productId,
     required String listingId,

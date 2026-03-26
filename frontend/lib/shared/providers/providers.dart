@@ -117,44 +117,9 @@ final currentBuyerProvider = StreamProvider<Buyer?>((ref) {
   });
 });
 
-// ─── All Active Listings (Manual Join to avoid Collection Group index) ───
-final activeListingsProvider = StreamProvider<List<Listing>>((ref) {
-  final firestore = ref.watch(firestoreProvider);
-
-  return firestore.collection('users').snapshots().asyncMap((userSnap) async {
-    final sellers = userSnap.docs.where((d) => d.data()['role'] == 'seller');
-    final List<Listing> allConfirmedListings = [];
-
-    for (final sellerDoc in sellers) {
-      final productSnap = await firestore
-          .collection('users')
-          .doc(sellerDoc.id)
-          .collection('products')
-          .get();
-
-      for (final productDoc in productSnap.docs) {
-        final productData = productDoc.data();
-        final listingsSnap = await productDoc.reference.collection('listings').get();
-
-        for (final listingDoc in listingsSnap.docs) {
-          final listingData = listingDoc.data();
-          // Filter for only 'confirmed' sessions (status 1 in enum)
-          final status = listingData['status'];
-          if (status == 1 || status == 'active' || status == 'confirmed') {
-            allConfirmedListings.add(Listing.fromFirestore(
-              productData: productData,
-              listingData: listingData,
-              listingId: listingDoc.id,
-              sellerId: sellerDoc.id,
-              productId: productDoc.id,
-            ));
-          }
-        }
-      }
-    }
-
-    return allConfirmedListings;
-  });
+// ─── All Active Listings (Backend Powered) ───
+final activeListingsProvider = StreamProvider<List<Listing>>((ref) async* {
+  yield await ref.watch(productServiceProvider).getAvailableListings();
 });
 
 // ─── Seller's Listings ───
