@@ -283,3 +283,8 @@ final filteredListingsProvider = Provider<AsyncValue<List<Listing>>>((ref) {
     return filtered;
   });
 });
+
+// ─── Seller Profile (Backend Powered) ───
+final sellerProfileProvider = FutureProvider.family<Map<String, dynamic>, String>((ref, sellerId) {
+  return ref.watch(productServiceProvider).getSellerProfile(sellerId);
+});

@@ -189,4 +189,69 @@ class ProductService {
       throw Exception(result['message'] ?? 'Failed to update listing status');
     }
   }
+
+  Future<void> placeOrder({
+    required String listingId,
+    required String sellerId,
+    required String productId,
+    required double quantity,
+    required double deposit,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No authenticated user found');
+
+    final idToken = await user.getIdToken();
+    if (idToken == null) throw Exception('Failed to retrieve authentication token');
+
+    final cleanBaseUrl = _baseUrl.endsWith('/') ? _baseUrl.substring(0, _baseUrl.length - 1) : _baseUrl;
+    final url = Uri.parse('$cleanBaseUrl/buyer/place_order');
+
+    final payload = {
+      'listingId': listingId,
+      'sellerId': sellerId,
+      'productId': productId,
+      'quantity': quantity,
+      'deposit': deposit,
+    };
+
+    print('[ProductService] Placing order with payload: ${jsonEncode(payload)}');
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $idToken',
+      },
+      body: jsonEncode(payload),
+    );
+
+    if (response.statusCode != 200) {
+      final result = jsonDecode(response.body);
+      throw Exception(result['message'] ?? 'Failed to place order');
+    }
+  }
+
+  Future<Map<String, dynamic>> getSellerProfile(String sellerId) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No authenticated user found');
+
+    final idToken = await user.getIdToken();
+    if (idToken == null) throw Exception('Failed to retrieve authentication token');
+
+    final cleanBaseUrl = _baseUrl.endsWith('/') ? _baseUrl.substring(0, _baseUrl.length - 1) : _baseUrl;
+    final url = Uri.parse('$cleanBaseUrl/buyer/seller/$sellerId');
+
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $idToken',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load seller profile: ${response.body}');
+    }
+
+    return jsonDecode(response.body);
+  }
 }
