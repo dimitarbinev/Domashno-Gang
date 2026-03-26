@@ -132,9 +132,9 @@ class _BuyerHomeScreenState extends ConsumerState<BuyerHomeScreen> {
             ),
             const SizedBox(height: 12),
             Expanded(
-              child: Builder(
-                builder: (context) {
-                  final filtered = _listings.where((l) {
+              child: ref.watch(activeListingsProvider).when(
+                data: (listings) {
+                  final filtered = listings.where((l) {
                     final matchesCategory = _selectedCategory == null || l.productCategory == _selectedCategory;
                     final matchesSearch = _searchController.text.isEmpty ||
                         l.productName.toLowerCase().contains(_searchController.text.toLowerCase()) ||
@@ -155,6 +155,17 @@ class _BuyerHomeScreenState extends ConsumerState<BuyerHomeScreen> {
                     ),
                   );
                 },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, stack) => Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text(
+                      'Error: $err\n\nNote: If this is an index error, please click the link in the debug console to create it.',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: AppTheme.statusCancelled),
+                    ),
+                  ),
+                ),
               ),
             ),
           ],
@@ -163,59 +174,6 @@ class _BuyerHomeScreenState extends ConsumerState<BuyerHomeScreen> {
     );
   }
 }
-
-// Demo data
-final _listings = [
-  Listing(
-    id: '1',
-    sellerId: 's1',
-    productId: 'p1',
-    productName: 'Pink Tomatoes (Balan)',
-    productCategory: 'Vegetables',
-    city: 'Balan',
-    date: DateTime.now().add(const Duration(days: 2)),
-    startTime: '08:00',
-    endTime: '12:00',
-    pricePerKg: 4.50,
-    availableQuantity: 150,
-    minThreshold: 80,
-    requestedQuantity: 55,
-    status: 'active',
-  ),
-  Listing(
-    id: '2',
-    sellerId: 's1',
-    productId: 'p2',
-    productName: 'Sweet Cherries',
-    productCategory: 'Fruits',
-    city: 'Balan',
-    date: DateTime.now().add(const Duration(days: 4)),
-    startTime: '09:00',
-    endTime: '14:00',
-    pricePerKg: 6.80,
-    availableQuantity: 80,
-    minThreshold: 40,
-    requestedQuantity: 42,
-    status: 'threshold_reached',
-  ),
-  Listing(
-    id: '3',
-    sellerId: 's1',
-    productId: 'p3',
-    productName: 'Spring Potatoes',
-    productCategory: 'Vegetables',
-    city: 'Balan',
-    date: DateTime.now().add(const Duration(days: 1)),
-    startTime: '08:00',
-    endTime: '11:00',
-    pricePerKg: 2.20,
-    availableQuantity: 300,
-    minThreshold: 150,
-    requestedQuantity: 180,
-    status: 'threshold_reached',
-    goDecision: true,
-  ),
-];
 
 class _CategoryChip extends StatelessWidget {
   final String label;

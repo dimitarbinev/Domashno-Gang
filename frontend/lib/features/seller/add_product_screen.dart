@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../core/theme.dart';
 import '../../core/constants.dart';
 import '../../shared/providers/providers.dart';
@@ -21,6 +23,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   final _maxCapacityController = TextEditingController();
   String? _selectedCategory;
   String? _selectedSeason;
+  File? _imageFile;
 
   bool _isLoading = false;
 
@@ -35,11 +38,18 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+    if (pickedFile != null) {
+      setState(() => _imageFile = File(pickedFile.path));
+    }
+  }
+
   Future<void> _handleSave() async {
     final name = _nameController.text.trim();
     final origin = _originController.text.trim();
     final priceStr = _priceController.text.trim();
-    // final quantityStr = _quantityController.text.trim(); // Ignored per backend spec
     final minThresholdStr = _minThresholdController.text.trim();
     final maxCapacityStr = _maxCapacityController.text.trim();
 
@@ -49,9 +59,10 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         minThresholdStr.isEmpty ||
         maxCapacityStr.isEmpty ||
         _selectedCategory == null ||
-        _selectedSeason == null) {
+        _selectedSeason == null ||
+        _imageFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all required fields')),
+        const SnackBar(content: Text('Please fill in all fields including the photo')),
       );
       return;
     }
@@ -70,13 +81,19 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     setState(() => _isLoading = true);
 
     try {
+      final user = ref.read(authStateProvider).value;
+      if (user == null) throw Exception('No authenticated user');
+
+      // Upload image first
+      final imageUrl = await ref.read(storageServiceProvider).uploadProductImage(_imageFile!, user.uid);
+
       await ref.read(productServiceProvider).addProduct(
             productName: name,
             minThreshold: minThreshold,
             maxCapacity: maxCapacity,
             category: _selectedCategory!,
             origin: origin,
-            image: "https://via.placeholder.com/150", // Temporary placeholder
+            image: imageUrl,
             pricePerKg: price,
             season: _selectedSeason!,
           );
@@ -120,7 +137,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
             children: [
               // Image upload area
               GestureDetector(
-                onTap: () {/* TODO */},
+                onTap: _pickImage,
                 child: Container(
                   height: 160,
                   decoration: BoxDecoration(
@@ -130,17 +147,27 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                       color: AppTheme.primaryGreen.withValues(alpha: 0.3),
                       width: 1.5,
                     ),
+                    image: _imageFile != null
+                        ? DecorationImage(
+                            image: FileImage(_imageFile!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
                   ),
-                  child: const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.add_photo_alternate_outlined,
-                          size: 40, color: AppTheme.accentGreen),
-                      SizedBox(height: 8),
-                      Text('Add Product Photo',
-                          style: TextStyle(color: AppTheme.textSecondary, fontSize: 14)),
-                    ],
-                  ),
+                  child: _imageFile == null
+                      ? const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.add_photo_alternate_outlined,
+                                size: 40, color: AppTheme.accentGreen),
+                            SizedBox(height: 8),
+                            Text('Add Product Photo',
+                                style: TextStyle(
+                                    color: AppTheme.textSecondary,
+                                    fontSize: 14)),
+                          ],
+                        )
+                      : null,
                 ),
               ),
               const SizedBox(height: 20),

@@ -110,3 +110,30 @@ export const getListings = catch_async(async (req: Request, res: Response) => {
 
     return res.status(200).json(listings);
 });
+
+export const updateListingStatus = catch_async(async (req: Request, res: Response) => {
+    const { productId, listingId, status } = req.body;
+
+    if (!productId || !listingId || status === undefined) {
+        return res.status(400).json({ message: "Invalid request: productId, listingId, and status are required" });
+    }
+
+    const uid = req.user?.uid as string;
+    const userRef = await db.collection("users").doc(uid).get();
+
+    if (!userRef.exists) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    const sellerDoc = await db.collection("users").doc(uid).collection('products').doc(productId).collection("listings").doc(listingId).get();
+    if (!sellerDoc.exists) {
+        return res.status(404).json({ message: "Listing not found" });
+    }
+
+    await db.collection("users").doc(uid).collection('products').doc(productId).collection("listings").doc(listingId).update({
+        status: Number(status),
+        updatedAt: new Date()
+    });
+
+    return res.status(200).json({ message: "Listing status updated successfully" });
+});

@@ -87,83 +87,122 @@ class SellerDashboardScreen extends ConsumerWidget {
               const SizedBox(height: 28),
 
               // Summary Cards
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 1.5,
-                children: [
-                  _MetricCard(
-                    icon: Icons.storefront_rounded,
-                    iconColor: AppTheme.statusActive,
-                    label: 'Active Listings',
-                    value: '5',
-                  ),
-                  _MetricCard(
-                    icon: Icons.inventory_2_rounded,
-                    iconColor: AppTheme.accentGreen,
-                    label: 'Requested Qty',
-                    value: '340 kg',
-                  ),
-                  _MetricCard(
-                    icon: Icons.pending_actions_rounded,
-                    iconColor: AppTheme.statusThresholdReached,
-                    label: 'Pending Decisions',
-                    value: '3',
-                  ),
-                  _MetricCard(
-                    icon: Icons.star_rounded,
-                    iconColor: AppTheme.statusThresholdReached,
-                    label: 'Avg Rating',
-                    value: '4.7',
-                  ),
-                ],
-              ),
-              const SizedBox(height: 28),
+              ref.watch(sellerListingsProvider(userId)).when(
+                data: (listings) {
+                  final activeCount = listings.where((l) => l.status == 'active').length;
+                  final totalRequested = listings.fold<double>(0, (sum, l) => sum + l.requestedQuantity);
+                  final pendingDecisions = listings.where((l) => l.status == 'threshold_reached' && l.goDecision == null).length;
 
-              // Quick Actions
-              Row(
-                children: [
-                  Expanded(
-                    child: _QuickAction(
-                      icon: Icons.add_circle_outline,
-                      label: 'Add Product',
-                      onTap: () => context.go('/seller/add-product'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _QuickAction(
-                      icon: Icons.post_add_rounded,
-                      label: 'New Listing',
-                      onTap: () => context.go('/seller/create-listing'),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 28),
+                  return Column(
+                    children: [
+                      GridView.count(
+                        crossAxisCount: 2,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        mainAxisSpacing: 12,
+                        crossAxisSpacing: 12,
+                        childAspectRatio: 1.5,
+                        children: [
+                          _MetricCard(
+                            icon: Icons.storefront_rounded,
+                            iconColor: AppTheme.statusActive,
+                            label: 'Active Listings',
+                            value: '$activeCount',
+                          ),
+                          _MetricCard(
+                            icon: Icons.inventory_2_rounded,
+                            iconColor: AppTheme.accentGreen,
+                            label: 'Requested Qty',
+                            value: '${totalRequested.toStringAsFixed(0)} kg',
+                          ),
+                          _MetricCard(
+                            icon: Icons.pending_actions_rounded,
+                            iconColor: AppTheme.statusThresholdReached,
+                            label: 'Pending Decisions',
+                            value: '$pendingDecisions',
+                          ),
+                          _MetricCard(
+                            icon: Icons.star_rounded,
+                            iconColor: AppTheme.statusThresholdReached,
+                            label: 'Avg Rating',
+                            value: ref.watch(reactiveSellerProvider).maybeWhen(
+                              data: (s) => (s?.rating ?? 0.0).toStringAsFixed(1),
+                              orElse: () => '0.0',
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 28),
 
-              // Recent Activity
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Recent Activity',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textPrimary,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 14),
-              ..._sampleListings.map(
-                (listing) => ListingCard(
-                  listing: listing,
-                  showSellerInfo: false,
-                  onTap: () => context.go('/seller/listing/${listing.id}'),
-                ),
+                      // Quick Actions
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _QuickAction(
+                              icon: Icons.add_circle_outline,
+                              label: 'Add Product',
+                              onTap: () => context.go('/seller/add-product'),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _QuickAction(
+                              icon: Icons.post_add_rounded,
+                              label: 'New Listing',
+                              onTap: () => context.go('/seller/create-listing'),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 28),
+
+                      // Recent Activity
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Upcoming Activity',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textPrimary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      () {
+                        final today = DateTime.now();
+                        final startOfToday = DateTime(today.year, today.month, today.day);
+                        
+                        final sortedListings = listings
+                            .where((l) => l.date.isAfter(startOfToday.subtract(const Duration(seconds: 1))))
+                            .toList();
+                            
+                        sortedListings.sort((a, b) => a.date.compareTo(b.date));
+                        
+                        if (sortedListings.isEmpty) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(vertical: 20),
+                              child: Text('No upcoming activity', style: TextStyle(color: AppTheme.textSecondary)),
+                            ),
+                          );
+                        }
+                        
+                        return Column(
+                          children: sortedListings.take(3).map(
+                            (listing) => ListingCard(
+                              listing: listing,
+                              showSellerInfo: false,
+                              onTap: () => context.go('/seller/listing/${listing.id}'),
+                            ),
+                          ).toList(),
+                        );
+                      }(),
+                    ],
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (err, stack) => Center(child: Text('Error: $err')),
               ),
             ],
           ),
@@ -172,59 +211,6 @@ class SellerDashboardScreen extends ConsumerWidget {
     );
   }
 }
-
-// Demo data
-final _sampleListings = [
-  Listing(
-    id: '1',
-    sellerId: 's1',
-    productId: 'p1',
-    productName: 'Pink Tomatoes (Balan)',
-    productCategory: 'Vegetables',
-    city: 'Balan',
-    date: DateTime.now().add(const Duration(days: 2)),
-    startTime: '08:00',
-    endTime: '12:00',
-    pricePerKg: 4.50,
-    availableQuantity: 150,
-    minThreshold: 80,
-    requestedQuantity: 55,
-    status: 'active',
-  ),
-  Listing(
-    id: '2',
-    sellerId: 's1',
-    productId: 'p2',
-    productName: 'Sweet Cherries',
-    productCategory: 'Fruits',
-    city: 'Balan',
-    date: DateTime.now().add(const Duration(days: 4)),
-    startTime: '09:00',
-    endTime: '14:00',
-    pricePerKg: 6.80,
-    availableQuantity: 80,
-    minThreshold: 40,
-    requestedQuantity: 42,
-    status: 'threshold_reached',
-  ),
-  Listing(
-    id: '3',
-    sellerId: 's1',
-    productId: 'p3',
-    productName: 'Spring Potatoes',
-    productCategory: 'Vegetables',
-    city: 'Balan',
-    date: DateTime.now().add(const Duration(days: 1)),
-    startTime: '08:00',
-    endTime: '11:00',
-    pricePerKg: 2.20,
-    availableQuantity: 300,
-    minThreshold: 150,
-    requestedQuantity: 180,
-    status: 'threshold_reached',
-    goDecision: true,
-  ),
-];
 
 class _NotifBell extends StatelessWidget {
   final VoidCallback onTap;

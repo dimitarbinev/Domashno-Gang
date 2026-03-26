@@ -116,7 +116,7 @@ class SellerProfileScreen extends ConsumerWidget {
                 label: 'Switch to Buyer',
                 onTap: () async {
                   try {
-                    await ref.read(userRoleProvider.notifier).switchRole('buyer');
+                    await ref.read(authServiceProvider).switchRole('buyer');
                     if (context.mounted) {
                       context.go('/buyer/home');
                     }
