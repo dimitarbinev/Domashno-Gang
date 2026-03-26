@@ -1,10 +1,6 @@
 import Flutter
 import UIKit
 import GoogleMaps
-import os
-import load_dotenv
-
-load_dotenv()
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
@@ -12,7 +8,11 @@ load_dotenv()
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    GMSServices.provideAPIKey(os.getenv("MAPS_API_KEY"))
+    if let apiKey = Bundle.main.object(forInfoDictionaryKey: "MAPS_API_KEY") as? String {
+      GMSServices.provideAPIKey(apiKey)
+    } else {
+      fatalError("MAPS_API_KEY not found in Info.plist")
+    }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
