@@ -41,6 +41,7 @@ export const register = catch_async(async (req: Request, res: Response) => {
         email,
         password,
         role,
+        phoneNumber: req.body.phoneNumber,
         preferredCity: req.body.preferredCity,
         createdAt: new Date()
       })
@@ -64,4 +65,20 @@ export const getProfile = catch_async(async (req: Request, res: Response) => {
       ...doc.data(),
     });
 
+})
+
+export const changeRole = catch_async(async (req: Request, res: Response) => {
+    const uid = req.user?.uid as string; 
+    const {role} = req.body;
+
+    if(!role) {
+        return res.status(400).json({message: "Invalid role"})
+    }
+
+    await db.collection('users').doc(uid).update({
+        role,
+        updatedAt: new Date()
+    })
+
+    return res.status(200).json({message: "Role changed successfully"})
 })
