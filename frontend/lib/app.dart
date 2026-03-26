@@ -16,6 +16,7 @@ import 'features/seller/seller_listing_detail_screen.dart';
 import 'features/seller/my_listings_screen.dart';
 import 'features/seller/route_planning_screen.dart';
 import 'features/seller/seller_profile_screen.dart';
+import 'features/seller/settings_screen.dart';
 import 'features/buyer/buyer_shell.dart';
 import 'features/buyer/buyer_home_screen.dart';
 import 'features/buyer/buyer_map_screen.dart';
@@ -97,6 +98,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/seller/create-listing',
         builder: (context, state) => const CreateListingScreen(),
+      ),
+      GoRoute(
+        path: '/seller/settings',
+        builder: (context, state) => const SettingsScreen(),
       ),
       GoRoute(
         path: '/seller/listing/:id',

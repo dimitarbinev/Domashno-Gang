@@ -77,7 +77,6 @@ class BuyerProfileScreen extends ConsumerWidget {
               const SizedBox(height: 28),
 
               // Menu items
-              _MenuItem(icon: Icons.edit_outlined, label: 'Edit Profile', onTap: () {}),
               _MenuItem(icon: Icons.receipt_long, label: 'Reservation History', onTap: () {}),
               _MenuItem(icon: Icons.favorite_outline, label: 'Saved Sellers', onTap: () {}),
               _MenuItem(icon: Icons.settings_outlined, label: 'Settings', onTap: () {}),
