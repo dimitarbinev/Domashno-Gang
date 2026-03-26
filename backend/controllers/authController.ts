@@ -82,3 +82,14 @@ export const changeRole = catch_async(async (req: Request, res: Response) => {
 
     return res.status(200).json({message: "Role changed successfully"})
 })
+
+export const getProfileName = catch_async(async (req: Request, res: Response) => {
+    const uid = req.user?.uid as string;
+    const userRef = await db.collection("users").doc(uid).get();
+
+    if (!userRef.exists) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({name: userRef.data()?.name});
+})
