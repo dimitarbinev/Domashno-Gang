@@ -1,0 +1,20 @@
+{
+  "options": [
+    {
+      "option_id": 1,
+      "name": "Best Route",
+      "ordered_stops": [
+        "Sofia",
+        "Plovdiv"
+      ],
+      "total_travel_hours": 3.77,
+      "expected_sell_qty_kg": 100.0,
+      "expected_revenue_bgn": 500.0,
+      "estimated_travel_cost_bgn": 56.55,
+      "estimated_profit_bgn": 443.45,
+      "is_profitable": true
+    }
+  ],
+  "best_option": 1,
+  "message": "Three route options generated. Choose the best for your needs or plan manually."
+}
