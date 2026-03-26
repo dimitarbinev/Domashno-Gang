@@ -58,7 +58,7 @@ export const listingConfirmation = catch_async(async (req: Request, res: Respons
         return res.status(403).json({ message: "User is not a seller" });
     }
 
-    await db.collection("users").doc(uid).collection('products').doc(productId).set({
+    await db.collection("users").doc(uid).collection('products').doc(productId).collection("listings").add({
         date,
         startTime,
         endTime,
