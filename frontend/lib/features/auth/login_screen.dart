@@ -43,7 +43,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         if (profile['role'] == 'seller') {
           context.go('/seller/dashboard');
         } else {
-          context.go('/buyer/dashboard');
+          context.go('/buyer/home');
         }
       }
     } catch (e) {

@@ -48,7 +48,7 @@ class _BuyerListingDetailScreenState extends State<BuyerListingDetailScreen> {
                 ),
                 child: const Icon(Icons.arrow_back_rounded, color: Colors.white),
               ),
-              onPressed: () => context.pop(),
+              onPressed: () => context.go('/buyer/home'),
             ),
             flexibleSpace: FlexibleSpaceBar(
               background: Stack(

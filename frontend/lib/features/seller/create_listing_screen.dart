@@ -68,7 +68,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
 
   void _handleCreate() {
     // TODO: Create listing in Firestore
-    context.pop();
+    context.go('/seller/dashboard');
   }
 
   @override
@@ -77,7 +77,7 @@ class _CreateListingScreenState extends State<CreateListingScreen> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.pop(),
+          onPressed: () => context.go('/seller/dashboard'),
         ),
         title: const Text('Create Listing'),
       ),
