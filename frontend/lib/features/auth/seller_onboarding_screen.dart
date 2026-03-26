@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../core/constants.dart';
+import '../../shared/providers/providers.dart';
 
-class SellerOnboardingScreen extends StatefulWidget {
+class SellerOnboardingScreen extends ConsumerStatefulWidget {
   const SellerOnboardingScreen({super.key});
 
   @override
-  State<SellerOnboardingScreen> createState() => _SellerOnboardingScreenState();
+  ConsumerState<SellerOnboardingScreen> createState() => _SellerOnboardingScreenState();
 }
 
-class _SellerOnboardingScreenState extends State<SellerOnboardingScreen> {
+class _SellerOnboardingScreenState extends ConsumerState<SellerOnboardingScreen> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   String? _selectedCity;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -22,9 +25,47 @@ class _SellerOnboardingScreenState extends State<SellerOnboardingScreen> {
     super.dispose();
   }
 
-  void _handleComplete() {
-    // TODO: Save seller profile to Firestore
-    context.go('/seller/dashboard');
+  Future<void> _handleComplete() async {
+    final name = _nameController.text.trim();
+    final city = _selectedCity;
+    final phone = _phoneController.text.trim();
+
+    if (name.isEmpty || city == null || phone.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final regData = ref.read(registrationDataProvider);
+      
+      await ref.read(authServiceProvider).signUp(
+        name: name,
+        email: regData['email']!,
+        password: regData['password']!,
+        role: regData['role']!,
+        mainCity: city,
+        phoneNumber: phone,
+      );
+
+      if (mounted) {
+        ref.read(registrationDataProvider.notifier).clear();
+        context.go('/seller/dashboard');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Registration failed: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
   }
 
   @override
@@ -147,12 +188,21 @@ class _SellerOnboardingScreenState extends State<SellerOnboardingScreen> {
                         borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
                       ),
                       child: ElevatedButton(
-                        onPressed: _handleComplete,
+                        onPressed: _isLoading ? null : _handleComplete,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
                         ),
-                        child: const Text('Complete Setup'),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('Complete Setup'),
                       ),
                     ),
                   ],

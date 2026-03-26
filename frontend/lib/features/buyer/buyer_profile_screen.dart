@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
+import '../../shared/providers/providers.dart';
 
-class BuyerProfileScreen extends StatelessWidget {
+class BuyerProfileScreen extends ConsumerWidget {
   const BuyerProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -55,6 +57,24 @@ class BuyerProfileScreen extends StatelessWidget {
               _MenuItem(icon: Icons.receipt_long, label: 'Reservation History', onTap: () {}),
               _MenuItem(icon: Icons.favorite_outline, label: 'Saved Sellers', onTap: () {}),
               _MenuItem(icon: Icons.settings_outlined, label: 'Settings', onTap: () {}),
+              _MenuItem(
+                icon: Icons.storefront_outlined,
+                label: 'Switch to Seller',
+                onTap: () async {
+                  try {
+                    await ref.read(userRoleProvider.notifier).switchRole('seller');
+                    if (context.mounted) {
+                      context.go('/seller/dashboard');
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Failed to switch role: $e')),
+                      );
+                    }
+                  }
+                },
+              ),
               _MenuItem(icon: Icons.help_outline, label: 'Help & Support', onTap: () {}),
               _MenuItem(
                 icon: Icons.logout,

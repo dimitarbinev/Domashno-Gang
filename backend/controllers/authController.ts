@@ -11,7 +11,7 @@ export const register = catch_async(async (req: Request, res: Response) => {
         return res.status(400).json({message: "All fields are required"})
     }
 
-    if(!role || role !== "seller" || role !== "buyer") {
+    if(!role) {
         return res.status(400).json({message: "Invalid role"})
     }
 
@@ -22,6 +22,32 @@ export const register = catch_async(async (req: Request, res: Response) => {
     }) 
 
     const uid = userRecord.uid;
+
+    if(role === "seller"){
+      await db.collection('users').doc(uid).set({
+        name,
+        email,
+        password,
+        role,
+        mainCity: req.body.mainCity,
+        phoneNumber: req.body.phoneNumber,
+        createdAt: new Date()
+      })
+    }
+
+    if(role === "buyer"){
+      await db.collection('users').doc(uid).set({
+        name,
+        email,
+        password,
+        role,
+        phoneNumber: req.body.phoneNumber,
+        preferredCity: req.body.preferredCity,
+        createdAt: new Date()
+      })
+    }
+
+    return res.status(200).json({message: "User registered successfully"})
 
 })
 
@@ -39,4 +65,31 @@ export const getProfile = catch_async(async (req: Request, res: Response) => {
       ...doc.data(),
     });
 
+})
+
+export const changeRole = catch_async(async (req: Request, res: Response) => {
+    const uid = req.user?.uid as string; 
+    const {role} = req.body;
+
+    if(!role) {
+        return res.status(400).json({message: "Invalid role"})
+    }
+
+    await db.collection('users').doc(uid).update({
+        role,
+        updatedAt: new Date()
+    })
+
+    return res.status(200).json({message: "Role changed successfully"})
+})
+
+export const getProfileName = catch_async(async (req: Request, res: Response) => {
+    const uid = req.user?.uid as string;
+    const userRef = await db.collection("users").doc(uid).get();
+
+    if (!userRef.exists) {
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({name: userRef.data()?.name});
 })

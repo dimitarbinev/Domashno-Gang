@@ -3,6 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/models.dart';
+import '../services/auth_service.dart';
+import '../services/product_service.dart';
+
+// ─── Service Providers ───
+final authServiceProvider = Provider<AuthService>((ref) => AuthService());
+final productServiceProvider = Provider<ProductService>((ref) => ProductService());
 
 // ─── Firebase Instance Providers ───
 final firebaseAuthProvider = Provider<FirebaseAuth>(
@@ -28,9 +34,28 @@ class UserRoleNotifier extends Notifier<String?> {
   String? build() => null;
 
   void setRole(String? role) => state = role;
+
+  Future<void> switchRole(String newRole) async {
+    await ref.read(authServiceProvider).switchRole(newRole);
+    state = newRole;
+  }
 }
 
 final userRoleProvider = NotifierProvider<UserRoleNotifier, String?>(UserRoleNotifier.new);
+
+// ─── Registration Data ───
+class RegistrationDataNotifier extends Notifier<Map<String, String>> {
+  @override
+  Map<String, String> build() => {};
+
+  void updateData(Map<String, String> data) {
+    state = {...state, ...data};
+  }
+
+  void clear() => state = {};
+}
+
+final registrationDataProvider = NotifierProvider<RegistrationDataNotifier, Map<String, String>>(RegistrationDataNotifier.new);
 
 // ─── Current Seller Profile ───
 final currentSellerProvider = FutureProvider<Seller?>((ref) {
@@ -102,19 +127,8 @@ final sellerListingsProvider = StreamProvider.family<List<Listing>, String>((
 });
 
 // ─── Seller's Products ───
-final sellerProductsProvider = StreamProvider.family<List<Product>, String>((
-  ref,
-  sellerId,
-) {
-  return ref
-      .watch(firestoreProvider)
-      .collection('products')
-      .where('sellerId', isEqualTo: sellerId)
-      .snapshots()
-      .map(
-        (snap) =>
-            snap.docs.map((d) => Product.fromJson(d.data(), d.id)).toList(),
-      );
+final sellerProductsProvider = FutureProvider<List<Product>>((ref) {
+  return ref.watch(productServiceProvider).getProducts();
 });
 
 // ─── Listing Reservations ───

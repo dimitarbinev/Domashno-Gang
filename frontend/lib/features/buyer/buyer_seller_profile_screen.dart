@@ -15,7 +15,7 @@ class BuyerSellerProfileScreen extends StatelessWidget {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.pop(),
+          onPressed: () => context.go('/buyer/home'),
         ),
         title: const Text('Seller Profile'),
       ),
