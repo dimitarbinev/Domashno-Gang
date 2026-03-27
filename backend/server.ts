@@ -6,8 +6,8 @@ import sellerRoutes from "./routing/sellerRoutes";
 import buyerRoutes from "./routing/buyerRoutes";
 import aiRoutes from "./routing/aiRoutes";
 
-import {verifyToken, sellerLimiter, error_lister} from "./middleware/middleware";
-import {availableListings} from "./controllers/buyerControllers";
+import { verifyToken, sellerLimiter, error_lister } from "./middleware/middleware";
+import { availableListings } from "./controllers/buyerControllers";
 
 const app = express();
 app.set('trust proxy', 1);
