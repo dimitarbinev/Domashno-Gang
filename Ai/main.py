@@ -276,28 +276,72 @@ async def recommend_route(req: DbRouteRequest):
             if not subset_cities: return None
             dest = subset_cities[-1]
             wps = subset_cities[:-1]
-            origin = f"{seller_coords['lat']},{seller_coords['lng']}"
-            destination = f"{dest.lat},{dest.lng}"
-            wp_param = f"&waypoints=optimize:true|{'|'.join(f'{c.lat},{c.lng}' for c in wps)}" if wps else ""
-            
-            url = f"https://maps.googleapis.com/maps/api/directions/json?origin={origin}&destination={destination}{wp_param}&key={MAPS_KEY}"
+
+            # Build Routes API request body
+            body = {
+                "origin": {
+                    "location": {
+                        "latLng": {"latitude": seller_coords['lat'], "longitude": seller_coords['lng']}
+                    }
+                },
+                "destination": {
+                    "location": {
+                        "latLng": {"latitude": dest.lat, "longitude": dest.lng}
+                    }
+                },
+                "travelMode": "DRIVE",
+                "polylineEncoding": "ENCODED_POLYLINE",
+                "computeAlternativeRoutes": False,
+                "routingPreference": "TRAFFIC_AWARE",
+                "languageCode": "bg",
+                "units": "METRIC",
+            }
+
+            if wps:
+                body["intermediates"] = [
+                    {"location": {"latLng": {"latitude": c.lat, "longitude": c.lng}}}
+                    for c in wps
+                ]
+                body["optimizeWaypointOrder"] = True
+
+            url = "https://routes.googleapis.com/directions/v2:computeRoutes"
+            headers = {
+                "Content-Type": "application/json",
+                "X-Goog-Api-Key": MAPS_KEY,
+                "X-Goog-FieldMask": "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline,routes.optimizedIntermediateWaypointIndex,routes.legs.duration,routes.legs.distanceMeters",
+            }
+
             async with httpx.AsyncClient() as client:
-                r = await client.get(url)
+                r = await client.post(url, json=body, headers=headers)
                 data = r.json()
-                if data.get("status") == "OK":
+                
+                if "routes" in data and len(data["routes"]) > 0:
                     route = data["routes"][0]
-                    total_hrs = sum(l["duration"]["value"] for l in route["legs"]) / 3600
-                    total_km = sum(l["distance"]["value"] for l in route["legs"]) / 1000
-                    
-                    order = route.get("waypoint_order", [])
+
+                    # Duration comes as "1234s" string
+                    duration_str = route.get("duration", "0s")
+                    total_secs = int(duration_str.rstrip("s"))
+                    total_hrs = total_secs / 3600
+
+                    total_km = route.get("distanceMeters", 0) / 1000
+
+                    # Encoded polyline for drawing on the map
+                    encoded_polyline = route.get("polyline", {}).get("encodedPolyline", "")
+
+                    # Optimized waypoint order
+                    order = route.get("optimizedIntermediateWaypointIndex", [])
                     stops = [seller_city_name]
-                    for idx in order:
-                        stops.append(wps[idx].name)
+                    if order:
+                        for idx in order:
+                            stops.append(wps[idx].name)
+                    else:
+                        for c in wps:
+                            stops.append(c.name)
                     stops.append(dest.name)
-                    
+
                     sell_qty = min(sum(c.requested_qty for c in subset_cities), available_qty)
                     profit = (sell_qty * price_per_kg) - (total_hrs * req.cost_per_hour)
-                    
+
                     return {
                         "label": label,
                         "ordered_stops": stops,
@@ -305,8 +349,10 @@ async def recommend_route(req: DbRouteRequest):
                         "total_travel_hours": round(total_hrs, 2),
                         "total_distance_km": round(total_km, 2),
                         "estimated_profit_bgn": round(profit, 2),
-                        "is_profitable": profit > 0
+                        "is_profitable": profit > 0,
+                        "encoded_polyline": encoded_polyline,
                     }
+                print(f"Routes API error for {label}: {data}")
                 return None
 
         # 1. Full trip
