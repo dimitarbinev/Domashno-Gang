@@ -73,16 +73,16 @@ class NatureScaffold extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    Colors.black.withValues(alpha: overlayOpacity),
-                    Colors.black.withValues(alpha: overlayOpacity * 0.4),
-                    Colors.black.withValues(alpha: overlayOpacity * 1.2),
+                    Colors.black.withValues(alpha: overlayOpacity * 0.9),
+                    Colors.black.withValues(alpha: overlayOpacity * 0.35),
+                    Colors.black.withValues(alpha: overlayOpacity * 0.85),
                   ],
                 ),
               ),
             ),
           ),
           // Content
-          currentBody,
+          Positioned.fill(child: currentBody),
         ],
       ),
     );

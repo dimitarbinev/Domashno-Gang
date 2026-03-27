@@ -20,6 +20,9 @@ class RatingStars extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final starColor = color ?? AppTheme.statusThresholdReached;
+    final emptyStarColor = Theme.of(context).brightness == Brightness.dark
+        ? Colors.white.withValues(alpha: 0.45)
+        : AppTheme.textTertiary;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(5, (index) {
@@ -36,7 +39,7 @@ class RatingStars extends StatelessWidget {
         final star = Icon(
           icon,
           size: size,
-          color: rating >= starIndex - 0.5 ? starColor : AppTheme.textTertiary,
+          color: rating >= starIndex - 0.5 ? starColor : emptyStarColor,
         );
 
         if (interactive) {

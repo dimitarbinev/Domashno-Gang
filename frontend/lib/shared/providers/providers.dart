@@ -195,6 +195,19 @@ final myReviewsProvider = StreamProvider<List<Review>>((ref) {
       .map((snap) => snap.docs.map((d) => Review.fromJson(d.data(), d.id)).toList());
 });
 
+final sellerReviewStatsProvider = Provider<AsyncValue<({double rating, int totalReviews})>>((ref) {
+  final reviewsAsync = ref.watch(myReviewsProvider);
+  return reviewsAsync.whenData((reviews) {
+    if (reviews.isEmpty) {
+      return (rating: 0.0, totalReviews: 0);
+    }
+
+    final total = reviews.length;
+    final avg = reviews.fold<double>(0.0, (acc, r) => acc + r.rating) / total;
+    return (rating: avg, totalReviews: total);
+  });
+});
+
 final myReservationsProvider = backendBuyerReservationsProvider;
 
 // ─── Seller Reviews ───

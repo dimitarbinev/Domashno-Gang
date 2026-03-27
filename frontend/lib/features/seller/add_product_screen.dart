@@ -203,18 +203,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
               ),
               const SizedBox(height: 18),
 
-              _buildFieldLabel('Категория'),
-              DropdownButtonFormField<String>(
-                value: _selectedCategory,
-                style: const TextStyle(color: Colors.white),
-                decoration: _inputDecoration('Избери категория'),
-                dropdownColor: Colors.black87,
-                items: AppConstants.productCategories
-                    .map((c) => DropdownMenuItem(value: c, child: Text(c, style: const TextStyle(color: Colors.white))))
-                    .toList(),
-                onChanged: (v) => setState(() => _selectedCategory = v),
-              ),
-              const SizedBox(height: 18),
+              
 
               _buildFieldLabel('Произход'),
               TextField(
@@ -308,6 +297,19 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                 ],
               ),
               const SizedBox(height: 32),
+              _buildFieldLabel('Категория'),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedCategory,
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDecoration('Избери категория'),
+                dropdownColor: Colors.black87,
+                items: AppConstants.productCategories
+                    .map((c) => DropdownMenuItem(value: c, child: Text(c, style: const TextStyle(color: Colors.white))))
+                    .toList(),
+                onChanged: (v) => setState(() => _selectedCategory = v),
+              ),
+              const SizedBox(height: 18),
+              
 
               Container(
                 height: 52,
