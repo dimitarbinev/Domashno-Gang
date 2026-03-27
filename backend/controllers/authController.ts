@@ -32,8 +32,8 @@ export const register = catch_async(async (req: Request, res: Response) => {
         email,
         password,
         role,
-        city,
-        phone,
+        city: city || "",
+        phone: phone || "",
         createdAt: new Date()
     })
 
