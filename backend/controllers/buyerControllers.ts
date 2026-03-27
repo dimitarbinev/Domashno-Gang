@@ -147,11 +147,15 @@ export const placeOrder = catch_async(async (req: Request, res: Response) => {
             const resRef = db.collection("reservations").doc();
             transaction.set(resRef, {
                 listingId, buyerId: uid, buyerName,
+                sellerId, productId, // adding these
+                productName: productData.productName || productData.name || '',
+                city: listingData.city || productData.origin || '',
+                pricePerKg: Number(productData.pricePerKg || 0),
                 quantity: requestedQty,
                 deposit: Number(deposit),
                 status: 'pending',
                 createdAt: new Date(),
-                attendanceDate: new Date()
+                attendanceDate: listingData.date || new Date()
             });
         });
 
@@ -215,4 +219,62 @@ export const getSellerProfile = catch_async(async (req: Request, res: Response) 
         listings: allListings,
         reviews: [] // Reviews not implemented yet
     });
+});
+
+export const getMyReservations = catch_async(async (req: Request, res: Response) => {
+    const uid = req.user?.uid;
+    if (!uid) {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const snapshot = await db.collection("reservations").where("buyerId", "==", uid).get();
+    
+    // Fetch orders to help backfill missing sellerId/productId in old reservations
+    const ordersSnapshot = await db.collection("users").doc(uid).collection("orders").get();
+    const ordersMap = new Map();
+    ordersSnapshot.docs.forEach(doc => {
+        ordersMap.set(doc.data().listingId, doc.data());
+    });
+    
+    const reservations: any[] = [];
+    for (const doc of snapshot.docs) {
+        const data = doc.data();
+        
+        // Safely parse dates, whether they are strings, Firestore Timestamps, or JS Dates
+        const parseDate = (val: any) => {
+            if (!val) return new Date().toISOString();
+            if (typeof val.toDate === 'function') return val.toDate().toISOString();
+            return new Date(val).toISOString();
+        };
+
+        let productName = data.productName;
+        let city = data.city;
+        let pricePerKg = data.pricePerKg;
+
+        // If old reservation is missing rich data
+        if (!productName || pricePerKg === undefined) {
+            const orderData = ordersMap.get(data.listingId);
+            if (orderData && orderData.sellerId && orderData.productId) {
+                const productSnap = await db.collection("users").doc(orderData.sellerId).collection("products").doc(orderData.productId).get();
+                if (productSnap.exists) {
+                    const pData = productSnap.data()!;
+                    productName = pData.productName || pData.name || "Product";
+                    pricePerKg = pData.pricePerKg || 0;
+                    city = pData.origin || pData.mainCity || "Local";
+                }
+            }
+        }
+
+        reservations.push({
+            id: doc.id,
+            ...data,
+            productName: productName || "Product",
+            city: city || "Local",
+            pricePerKg: Number(pricePerKg || 0),
+            attendanceDate: parseDate(data.attendanceDate),
+            createdAt: parseDate(data.createdAt),
+        });
+    }
+
+    return res.status(200).json(reservations);
 });
