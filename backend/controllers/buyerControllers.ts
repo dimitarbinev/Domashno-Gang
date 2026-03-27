@@ -374,7 +374,7 @@ export const cancelReservation = catch_async(async (req: Request, res: Response)
             }
 
             const resData = resDoc.data()!;
-            if (resData.buyerId !== uid) {
+            if (resData.buyerId !== uid && resData.sellerId !== uid) {
                 throw new Error("Unauthorized to cancel this reservation");
             }
 
@@ -382,7 +382,8 @@ export const cancelReservation = catch_async(async (req: Request, res: Response)
                 throw new Error("Reservation already cancelled");
             }
             if (resData.status === 'confirmed' || resData.status === 'completed') {
-                throw new Error("Cannot cancel a confirmed or completed reservation. Please contact the seller.");
+                const isBuyer = uid === resData.buyerId;
+                throw new Error(isBuyer ? "Cannot cancel a confirmed or completed reservation. Please contact the seller." : "Cannot cancel a confirmed or completed reservation.");
             }
 
             // Read listing info if necessary
@@ -396,7 +397,7 @@ export const cancelReservation = catch_async(async (req: Request, res: Response)
             }
 
             // Read order info (Regular query - MUST BE BEFORE UPDATES)
-            const ordersSnapshot = await db.collection("users").doc(uid).collection("orders")
+            const ordersSnapshot = await db.collection("users").doc(resData.buyerId).collection("orders")
                 .where("listingId", "==", resData.listingId)
                 .where("quantity", "==", resData.quantity)
                 .get();
