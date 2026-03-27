@@ -209,7 +209,8 @@ async def recommend_route(req: DbRouteRequest):
             b_doc = db.collection("users").document(b_id).get()
             if b_doc.exists:
                 b_data = b_doc.to_dict()
-                buyer_city_map[b_id] = b_data.get("mainCity") or b_data.get("city")
+                # Prioritize preferredCity from user profile
+                buyer_city_map[b_id] = b_data.get("preferredCity") or b_data.get("mainCity") or b_data.get("city")
 
         # 5. Aggregate demands into City objects
         combined_city_demands = {} # city_name -> qty
@@ -222,7 +223,7 @@ async def recommend_route(req: DbRouteRequest):
 
         candidates = []
         for name, qty in combined_city_demands.items():
-            if qty < 5: continue # Filter per user logic
+            if qty < 0.1: continue # Threshold lowered to 0.1 for testing
             coords = await get_coordinates(name)
             if coords:
                 candidates.append(City(name=name, lat=coords['lat'], lng=coords['lng'], requested_qty=qty))
@@ -268,16 +269,13 @@ async def recommend_route(req: DbRouteRequest):
                     }
                 return None
 
-        # 6. Generate Scenarios
+        # 6. Generate Scenarios (Full Path and Local Path only)
         task_full = fetch_api_route(candidates, "Пълна обиколка")
         
         local_cities = [c for c in candidates if get_distance_km(seller_coords['lat'], seller_coords['lng'], c.lat, c.lng) < 45]
         task_local = fetch_api_route(local_cities, "Локален лъч")
-        
-        north_cities = [c for c in candidates if "Ловеч" in c.name or "Плевен" in c.name or "Албаница" in c.name]
-        task_north = fetch_api_route(north_cities, "Посока Север")
 
-        results = await asyncio.gather(task_full, task_local, task_north)
+        results = await asyncio.gather(task_full, task_local)
         
         final_options = []
         seen_routes = []
