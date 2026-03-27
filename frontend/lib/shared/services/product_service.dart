@@ -67,6 +67,36 @@ class ProductService {
     }
   }
 
+  Future<String?> classifyProduct(String productName) async {
+    final user = _auth.currentUser;
+    if (user == null) return null;
+
+    final idToken = await user.getIdToken();
+    if (idToken == null) return null;
+
+    try {
+      final cleanBaseUrl = _baseUrl.endsWith('/') ? _baseUrl.substring(0, _baseUrl.length - 1) : _baseUrl;
+      final url = Uri.parse('$cleanBaseUrl/ai/classify');
+
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $idToken',
+        },
+        body: jsonEncode({'productName': productName}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        return data['category'] as String?;
+      }
+    } catch (e) {
+      print('Classification error: $e');
+    }
+    return null;
+  }
+
   Future<List<Product>> getProducts() async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('No authenticated user found');
