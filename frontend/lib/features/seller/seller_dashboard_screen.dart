@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../shared/widgets/listing_card.dart';
+import '../../shared/widgets/rating_stars.dart';
 import '../../shared/models/models.dart';
 import '../../shared/providers/providers.dart';
 
@@ -91,7 +92,6 @@ class SellerDashboardScreen extends ConsumerWidget {
                 data: (listings) {
                   final activeCount = listings.where((l) => l.status == 'active' || l.status == 'confirmed').length;
                   final totalRequested = listings.fold<double>(0, (sum, l) => sum + l.requestedQuantity);
-                  final pendingDecisions = listings.where((l) => (l.status == 'threshold_reached' || l.status == 'active') && l.requestedQuantity >= l.minThreshold).length;
 
                   return Column(
                     children: [
@@ -116,14 +116,17 @@ class SellerDashboardScreen extends ConsumerWidget {
                             value: '${totalRequested.toStringAsFixed(0)} kg',
                           ),
                           _MetricCard(
-                            icon: Icons.pending_actions_rounded,
+                            icon: Icons.rate_review_rounded,
                             iconColor: AppTheme.statusThresholdReached,
-                            label: 'Pending Decisions',
-                            value: '$pendingDecisions',
+                            label: 'Total Reviews',
+                            value: ref.watch(reactiveSellerProvider).maybeWhen(
+                              data: (s) => '${s?.totalReviews ?? 0}',
+                              orElse: () => '0',
+                            ),
                           ),
                           _MetricCard(
                             icon: Icons.star_rounded,
-                            iconColor: AppTheme.statusThresholdReached,
+                            iconColor: AppTheme.accentGreen,
                             label: 'Avg Rating',
                             value: ref.watch(reactiveSellerProvider).maybeWhen(
                               data: (s) => (s?.rating ?? 0.0).toStringAsFixed(1),
@@ -198,6 +201,53 @@ class SellerDashboardScreen extends ConsumerWidget {
                           ).toList(),
                         );
                       }(),
+                      const SizedBox(height: 28),
+
+                      // Recent Reviews
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          'Recent Reviews',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      ref.watch(myReviewsProvider).when(
+                        data: (reviews) {
+                          if (reviews.isEmpty) {
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 20),
+                                child: Text('No reviews yet', style: TextStyle(color: AppTheme.textSecondary)),
+                              ),
+                            );
+                          }
+                          return Column(
+                            children: reviews.take(5).map((r) => Container(
+                              margin: const EdgeInsets.only(bottom: 10),
+                              padding: const EdgeInsets.all(14),
+                              decoration: glassDecoration(),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(r.buyerName ?? 'Anonymous', style: const TextStyle(fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
+                                      const Spacer(),
+                                      RatingStars(rating: r.rating, size: 14),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(r.comment, style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary, height: 1.4)),
+                                ],
+                              ),
+                            )).toList(),
+                          );
+                        },
+                        loading: () => const Center(child: CircularProgressIndicator()),
+                        error: (err, _) => Center(child: Text('Error: $err')),
+                      ),
+                      const SizedBox(height: 40),
                     ],
                   );
                 },

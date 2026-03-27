@@ -19,33 +19,7 @@ class AppConstants {
   ];
 
   // ─── Bulgarian Cities ───
-  static const List<String> cities = [
-    'Sofia',
-    'Plovdiv',
-    'Varna',
-    'Burgas',
-    'Ruse',
-    'Stara Zagora',
-    'Pleven',
-    'Sliven',
-    'Dobrich',
-    'Shumen',
-    'Pernik',
-    'Haskovo',
-    'Yambol',
-    'Pazardzhik',
-    'Blagoevgrad',
-    'Veliko Tarnovo',
-    'Vratsa',
-    'Gabrovo',
-    'Asenovgrad',
-    'Vidin',
-    'Kazanlak',
-    'Kyustendil',
-    'Montana',
-    'Dimitrovgrad',
-    'Lovech',
-  ];
+  // cities list is now a getter below derived from cityLocations
 
   static const Map<String, ({double lat, double lng})> cityLocations = {
     'Sofia': (lat: 42.6977, lng: 23.3219),

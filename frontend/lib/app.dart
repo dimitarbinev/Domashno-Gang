@@ -23,6 +23,7 @@ import 'features/buyer/buyer_listing_detail_screen.dart';
 import 'features/buyer/buyer_seller_profile_screen.dart';
 import 'features/buyer/saved_sellers_screen.dart';
 import 'features/buyer/my_reservations_screen.dart';
+import 'features/buyer/buyer_reservation_detail_screen.dart';
 import 'features/buyer/leave_review_screen.dart';
 import 'features/buyer/buyer_profile_screen.dart';
 import 'features/notifications/notifications_screen.dart';
@@ -140,14 +141,14 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => BuyerSellerProfileScreen(sellerId: state.pathParameters['id']!),
       ),
       GoRoute(
-        path: '/buyer/saved-sellers',
-        builder: (context, state) => const SavedSellersScreen(),
+        path: '/buyer/reservation/:id',
+        builder: (context, state) => BuyerReservationDetailScreen(
+          reservationId: state.pathParameters['id']!,
+        ),
       ),
       GoRoute(
-        path: '/buyer/review/:sellerId',
-        builder: (context, state) => LeaveReviewScreen(
-          sellerId: state.pathParameters['sellerId']!,
-        ),
+        path: '/buyer/saved-sellers',
+        builder: (context, state) => const SavedSellersScreen(),
       ),
     ],
     redirect: (context, state) {
