@@ -22,6 +22,16 @@ class RoutePlanningScreen extends ConsumerWidget {
 
     final listingsAsync = ref.watch(sellerListingsProvider(user.uid));
     final mapState = ref.watch(mapProvider);
+    final citiesAsync = ref.watch(sellerReservationCitiesProvider(user.uid));
+
+    // Listen for city changes to trigger route calculation
+    ref.listen(sellerReservationCitiesProvider(user.uid), (prev, next) {
+      next.whenData((info) {
+        if (info.uniqueCities.length > 1 && mapState.routeOptions.isEmpty && !mapState.isLoading) {
+          ref.read(mapProvider.notifier).fetchMultiDayRoute(info.uniqueCities);
+        }
+      });
+    });
 
     return NatureScaffold(
       appBar: AppBar(
@@ -29,6 +39,15 @@ class RoutePlanningScreen extends ConsumerWidget {
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          if (citiesAsync.hasValue && citiesAsync.value!.uniqueCities.length > 1)
+            IconButton(
+              icon: const Icon(Icons.refresh, color: Colors.white),
+              onPressed: () {
+                ref.read(mapProvider.notifier).fetchMultiDayRoute(citiesAsync.value!.uniqueCities);
+              },
+            ),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -59,16 +78,12 @@ class RoutePlanningScreen extends ConsumerWidget {
                       zoomControlsEnabled: false,
                       mapType: MapType.normal,
                       onMapCreated: (controller) {
-                        if (mapState.routeOptions.isEmpty) {
-                          ref.read(mapProvider.notifier).fetchMultiDayRoute([
-                            'Pernik',
-                            'Sofia',
-                            'Vratsa',
-                            'Shumen',
-                            'Varna',
-                            'Burgas',
-                          ]);
-                        }
+                        // Initial fetch if data is already available
+                        citiesAsync.whenData((info) {
+                          if (info.uniqueCities.length > 1 && mapState.routeOptions.isEmpty) {
+                            ref.read(mapProvider.notifier).fetchMultiDayRoute(info.uniqueCities);
+                          }
+                        });
                       },
                     );
                   },
@@ -101,34 +116,70 @@ class RoutePlanningScreen extends ConsumerWidget {
             const SizedBox(height: 12),
 
             // ── Route Details List ──
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-              child: Text(
-                'Вашият план за седмицата',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w800,
-                  color: AppTheme.textPrimary,
-                ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              child: Row(
+                children: [
+                  const Text(
+                    'Вашият план за седмицата',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.textPrimary,
+                    ),
+                  ),
+                  const Spacer(),
+                  citiesAsync.when(
+                    data: (info) => Text(
+                      '${info.totalReservations} клиента',
+                      style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                    ),
+                    loading: () => const SizedBox.shrink(),
+                    error: (_, __) => const SizedBox.shrink(),
+                  ),
+                ],
               ),
             ),
             Expanded(
               flex: 2,
               child: mapState.isLoading
                   ? const Center(child: CircularProgressIndicator(color: AppTheme.primaryGreen))
-                  : mapState.routeOptions.isEmpty
-                      ? const Center(
-                          child: Text('Няма планирани маршрути',
-                              style: TextStyle(color: AppTheme.textSecondary)))
-                      : ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          itemCount: mapState.routeOptions.length,
-                          itemBuilder: (context, index) {
-                            return _DayRouteCard(
-                              routeInfo: mapState.routeOptions[index] as Map<String, dynamic>,
-                            );
-                          },
-                        ),
+                  : citiesAsync.when(
+                      data: (info) {
+                        if (info.totalReservations == 0) {
+                          return const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(24),
+                              child: Text(
+                                'Нямате нови резервации за доставка.\nМаршрутът ще се обнови автоматично при нови заявки.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(color: AppTheme.textSecondary),
+                              ),
+                            ),
+                          );
+                        }
+                        return mapState.routeOptions.isEmpty
+                            ? Center(
+                                child: Text(
+                                  mapState.isLoading 
+                                    ? 'Изчисляване на най-добрия маршрут...'
+                                    : 'Грешка: Не може да се генерира маршрут.\nУверете се, че градовете са валидни.',
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(color: AppTheme.textSecondary)
+                                ))
+                            : ListView.builder(
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                itemCount: mapState.routeOptions.length,
+                                itemBuilder: (context, index) {
+                                  return _DayRouteCard(
+                                    routeInfo: mapState.routeOptions[index] as Map<String, dynamic>,
+                                  );
+                                },
+                              );
+                      },
+                      loading: () => const Center(child: CircularProgressIndicator()),
+                      error: (err, _) => const Center(child: Text('Грешка при зареждане на градове')),
+                    ),
             ),
           ],
         ),

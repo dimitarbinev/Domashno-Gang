@@ -8,6 +8,7 @@ import '../models/models.dart';
 import '../services/auth_service.dart';
 import '../services/product_service.dart';
 import '../services/storage_service.dart';
+import '../../core/constants.dart';
 
 // ─── Service Providers ───
 final authServiceProvider = Provider<AuthService>((ref) => AuthService());
@@ -230,6 +231,76 @@ final notificationsProvider =
                     .toList(),
           );
     });
+
+// ─── Seller's Route Info (Cities + Reservations) ───
+class SellerRouteInfo {
+  final List<String> uniqueCities;
+  final int totalReservations;
+  final List<Reservation> reservations;
+
+  SellerRouteInfo({
+    required this.uniqueCities,
+    required this.totalReservations,
+    required this.reservations,
+  });
+}
+
+final sellerReservationCitiesProvider = StreamProvider.family<SellerRouteInfo, String>((ref, sellerId) {
+  final firestore = ref.watch(firestoreProvider);
+  final sellerAsync = ref.watch(reactiveSellerProvider);
+  
+  return firestore
+      .collection('reservations')
+      .where('sellerId', isEqualTo: sellerId)
+      .snapshots()
+      .asyncMap((snap) async {
+    final reservations = snap.docs.map((d) {
+      final data = d.data();
+      return Reservation.fromJson(data, d.id);
+    }).toList();
+
+    // Get unique buyer IDs
+    final buyerIds = reservations
+        .map((r) => r.buyerId)
+        .where((id) => id.isNotEmpty)
+        .toSet()
+        .toList();
+
+    // Look up each buyer's city from their user profile
+    final List<String> cities = [];
+    for (final buyerId in buyerIds) {
+      final userDoc = await firestore.collection('users').doc(buyerId).get();
+      if (userDoc.exists) {
+        final data = userDoc.data()!;
+        // Use preferredCity for buyers, mainCity for sellers
+        final rawCity = (data['preferredCity'] as String?) ??
+                        (data['mainCity'] as String?) ??
+                        '';
+        final city = AppConstants.normalizeCityName(rawCity);
+        if (city.isNotEmpty && !cities.contains(city)) {
+          cities.add(city);
+        }
+      }
+    }
+
+    // Add seller's main city as the starting point
+    final seller = sellerAsync.value;
+    if (seller != null && seller.mainCity.isNotEmpty) {
+      if (!cities.contains(seller.mainCity)) {
+        cities.insert(0, seller.mainCity);
+      } else {
+        cities.remove(seller.mainCity);
+        cities.insert(0, seller.mainCity);
+      }
+    }
+    
+    return SellerRouteInfo(
+      uniqueCities: cities,
+      totalReservations: reservations.length,
+      reservations: reservations,
+    );
+  });
+});
 
 final unreadNotificationCountProvider = Provider.family<int, String>((
   ref,

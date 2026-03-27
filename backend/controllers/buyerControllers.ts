@@ -81,6 +81,7 @@ export const placeOrder = catch_async(async (req: Request, res: Response) => {
     }
 
     const buyerName = userDoc.data()?.name || "Anonymous";
+    const buyerCity = userDoc.data()?.preferredCity || "";
 
     // Refs for atomic transaction
     const listingRef = db.collection("users").doc(sellerId)
@@ -146,9 +147,10 @@ export const placeOrder = catch_async(async (req: Request, res: Response) => {
             const resRef = db.collection("reservations").doc();
             transaction.set(resRef, {
                 listingId, buyerId: uid, buyerName,
-                sellerId, productId, // adding these
+                sellerId, productId,
                 productName: productData.productName || productData.name || '',
-                city: listingData.city || productData.origin || '',
+                // Use BUYER city for delivery routes if available, fallback to listing city
+                city: buyerCity || listingData.city || productData.origin || '',
                 pricePerKg: Number(productData.pricePerKg || 0),
                 quantity: requestedQty,
                 deposit: Number(deposit),
