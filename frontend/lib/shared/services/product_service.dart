@@ -83,7 +83,7 @@ class ProductService {
     try {
       final cleanBaseUrl =
           _baseUrl.endsWith('/') ? _baseUrl.substring(0, _baseUrl.length - 1) : _baseUrl;
-      final url = Uri.parse('$cleanBaseUrl/price-suggestion');
+      final url = Uri.parse('$cleanBaseUrl/ai/price-suggestion');
       final response = await http.post(
         url,
         headers: {
@@ -113,7 +113,7 @@ class ProductService {
 
     try {
       final cleanBaseUrl = _baseUrl.endsWith('/') ? _baseUrl.substring(0, _baseUrl.length - 1) : _baseUrl;
-      final url = Uri.parse('$cleanBaseUrl/classify-product');
+      final url = Uri.parse('$cleanBaseUrl/ai/classify');
 
       final response = await http.post(
         url,
