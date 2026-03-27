@@ -9,6 +9,9 @@ class ProductService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final String _baseUrl = dotenv.env['BACKEND_URL'] ?? '';
 
+  static const Duration _authTimeout = Duration(seconds: 12);
+  static const Duration _httpTimeout = Duration(seconds: 20);
+
   Future<void> addProduct({
     required String productName,
     required double minThreshold,
@@ -200,7 +203,14 @@ class ProductService {
     final user = _auth.currentUser;
     if (user == null) throw Exception('No authenticated user found');
 
-    final idToken = await user.getIdToken();
+    if (_baseUrl.isEmpty) {
+      throw Exception('BACKEND_URL липсва в .env — списъкът с обяви не може да се зареди.');
+    }
+
+    final idToken = await user.getIdToken().timeout(
+      _authTimeout,
+      onTimeout: () => throw Exception('Таймаут при взимане на токен. Проверете мрежата.'),
+    );
     if (idToken == null) throw Exception('Failed to retrieve authentication token');
 
     final cleanBaseUrl = _baseUrl.endsWith('/') ? _baseUrl.substring(0, _baseUrl.length - 1) : _baseUrl;
@@ -211,6 +221,11 @@ class ProductService {
       headers: {
         'Authorization': 'Bearer $idToken',
       },
+    ).timeout(
+      _httpTimeout,
+      onTimeout: () => throw Exception(
+        'Сървърът не отговори навреме. Проверете BACKEND_URL, дали API-то работи и мрежата.',
+      ),
     );
 
     if (response.statusCode != 200) {
