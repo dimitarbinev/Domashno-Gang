@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,6 +28,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   File? _imageFile;
 
   bool _isLoading = false;
+  Timer? _debounce;
 
   @override
   void dispose() {
@@ -36,7 +38,22 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     _quantityController.dispose();
     _minThresholdController.dispose();
     _maxCapacityController.dispose();
+    _debounce?.cancel();
     super.dispose();
+  }
+
+  void _onNameChanged(String value) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 800), () async {
+      if (value.length > 2) {
+        final category = await ref.read(productServiceProvider).classifyProduct(value);
+        if (category != null && mounted) {
+          setState(() {
+            _selectedCategory = category;
+          });
+        }
+      }
+    });
   }
 
   Future<void> _pickImage() async {
@@ -180,6 +197,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
               _buildFieldLabel('Име на продукт'),
               TextField(
                 controller: _nameController,
+                onChanged: _onNameChanged,
                 style: const TextStyle(color: Colors.white),
                 decoration: _inputDecoration('Напр. Розови домати'),
               ),
@@ -187,7 +205,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
 
               _buildFieldLabel('Категория'),
               DropdownButtonFormField<String>(
-                initialValue: _selectedCategory,
+                value: _selectedCategory,
                 style: const TextStyle(color: Colors.white),
                 decoration: _inputDecoration('Избери категория'),
                 dropdownColor: Colors.black87,
