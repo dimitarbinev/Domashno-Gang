@@ -42,7 +42,17 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
         );
 
         if (listing == null) {
-          return const Scaffold(body: Center(child: Text('Listing not found')));
+          return Scaffold(
+            appBar: AppBar(
+              backgroundColor: AppTheme.darkBackground,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_rounded),
+                onPressed: () => context.go('/buyer/home'),
+              ),
+              title: const Text('Listing Details'),
+            ),
+            body: const Center(child: Text('Listing not found')),
+          );
         }
 
         return Scaffold(
