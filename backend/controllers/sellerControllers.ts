@@ -7,7 +7,7 @@ import { Product, Status } from "../src/types.js";
 export const productListing = catch_async(async (req: Request, res: Response) => {
     const productData: Partial<Product> = req.body;
 
-    const requiredFields = ['productName', 'minThreshold', 'maxCapacity', 'category', 'origin', 'pricePerKg', 'availableQuantity'];
+    const requiredFields = ['productName', 'minThreshold', 'maxCapacity', 'origin', 'pricePerKg', 'availableQuantity'];
     const missingFields = requiredFields.filter(field => !productData[field as keyof Product]);
 
     if (missingFields.length > 0) {
@@ -16,6 +16,29 @@ export const productListing = catch_async(async (req: Request, res: Response) =>
             message: `Missing fields: ${missingFields.join(', ')}`
         });
     }
+
+    // Auto-classify category if missing
+    let category = productData.category;
+    if (!category && productData.productName) {
+        try {
+            const AI_SERVICE_URL = process.env.AI_SERVICE_URL || "http://localhost:8000";
+            const aiRes = await fetch(`${AI_SERVICE_URL}/classify-product`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ product_name: productData.productName }),
+            });
+            if (aiRes.ok) {
+                const aiData = await aiRes.json() as any;
+                category = aiData.category;
+                console.log(`AI classified ${productData.productName} as ${category}`);
+            }
+        } catch (err) {
+            console.error("AI Classification failed, falling back to 'Други':", err);
+            category = "Други";
+        }
+    }
+
+    if (!category) category = "Други";
 
     const uid = req.user?.uid as string;
     const userRef = await db.collection("users").doc(uid).get();
@@ -33,7 +56,7 @@ export const productListing = catch_async(async (req: Request, res: Response) =>
         productName: productData.productName,
         minThreshold: productData.minThreshold,
         maxCapacity: productData.maxCapacity,
-        category: productData.category,
+        category: category,
         image: productData.image,
         origin: productData.origin,
         pricePerKg: productData.pricePerKg,

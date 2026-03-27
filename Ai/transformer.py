@@ -11,7 +11,7 @@ load_dotenv()
 # 1. Дефинираме структурата на отговора (за максимална стабилност)
 class ProduceClassification(BaseModel):
     item: str = Field(description="Името на продукта на български")
-    category: Literal["зеленчук", "плод", "месо", "млечен продукт", "друго"] = Field(
+    category: Literal['Зеленчуци', 'Плодове', 'Зърнени', 'Млечни', 'Билки', 'Ядки', 'Мед', 'Месо', 'Яйца', 'Други'] = Field(
         description="Категорията, към която принадлежи продукта"
     )
     confidence: float = Field(description="Увереност на модела от 0 до 1")

@@ -107,7 +107,7 @@ class CityModel(BaseModel):
 
 class ProduceClassification(BaseModel):
     item: str = Field(description="Името на продукта на български")
-    category: Literal["зеленчук", "плод", "месо", "млечен продукт", "друго"] = Field(
+    category: Literal['Зеленчуци', 'Плодове', 'Зърнени', 'Млечни', 'Билки', 'Ядки', 'Мед', 'Месо', 'Яйца', 'Други'] = Field(
         description="Категорията, към която принадлежи продукта"
     )
     confidence: float = Field(description="Увереност на модела от 0 до 1")
@@ -190,8 +190,8 @@ async def classify_product(req: ClassificationRequest):
         # Fallback logic if OpenAI is not configured
         name = req.product_name.lower()
         if "домат" in name or "краставиц" in name:
-            return {"item": req.product_name, "category": "зеленчук", "confidence": 1.0}
-        return {"item": req.product_name, "category": "друго", "confidence": 0.0}
+            return {"item": req.product_name, "category": "Зеленчуци", "confidence": 1.0}
+        return {"item": req.product_name, "category": "Други", "confidence": 0.0}
     
     try:
         result = classification_chain.invoke({"product": req.product_name})
