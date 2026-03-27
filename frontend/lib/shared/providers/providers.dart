@@ -120,8 +120,8 @@ final currentBuyerProvider = StreamProvider<Buyer?>((ref) {
 });
 
 // ─── All Active Listings (Backend Powered) ───
-final activeListingsProvider = StreamProvider<List<Listing>>((ref) async* {
-  yield await ref.watch(productServiceProvider).getAvailableListings();
+final activeListingsProvider = FutureProvider<List<Listing>>((ref) {
+  return ref.watch(productServiceProvider).getAvailableListings();
 });
 
 // ─── Seller's Listings ───

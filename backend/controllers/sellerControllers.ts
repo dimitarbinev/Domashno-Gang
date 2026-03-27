@@ -47,7 +47,7 @@ export const productListing = catch_async(async (req: Request, res: Response) =>
 })
 
 export const listingConfirmation = catch_async(async (req: Request, res: Response) => {
-    const {productId, date, startTime, endTime} = req.body;
+    const {productId, city, date, startTime, endTime} = req.body;
 
     if(!productId || !date || !startTime || !endTime) {
         return res.status(400).json({message: "Invalid request"})
@@ -66,9 +66,11 @@ export const listingConfirmation = catch_async(async (req: Request, res: Respons
     }
 
     await db.collection("users").doc(uid).collection('products').doc(productId).collection("listings").add({
+        city: city || '',
         date,
         startTime,
         endTime,
+        requestedQuantity: 0,
         status: Status.active,
         updatedAt: new Date()
     })
