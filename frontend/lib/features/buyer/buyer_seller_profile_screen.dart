@@ -172,8 +172,64 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const NatureScaffold(body: Center(child: CircularProgressIndicator())),
-      error: (err, _) => NatureScaffold(body: Center(child: Text('Error: $err', style: const TextStyle(color: Colors.white)))),
+      loading: () => NatureScaffold(
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                onPressed: () => context.go('/buyer/home'),
+              ),
+              title: const Text('Профил на продавач', style: TextStyle(color: Colors.white)),
+            ),
+            body: const Center(child: CircularProgressIndicator(color: AppTheme.accentGreen)),
+          ),
+      error: (err, _) => NatureScaffold(
+            appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                tooltip: 'Назад',
+                onPressed: () => context.go('/buyer/home'),
+              ),
+              title: const Text('Профил на продавач', style: TextStyle(color: Colors.white)),
+            ),
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.cloud_off_rounded, size: 56, color: AppTheme.textTertiary),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Неуспешно зареждане на профила. Проверете връзката и дали сървърът работи (ngrok / BACKEND_URL).',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.85), height: 1.35),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      '$err',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: AppTheme.statusCancelled, fontSize: 12),
+                    ),
+                    const SizedBox(height: 28),
+                    FilledButton.icon(
+                      onPressed: () => context.go('/buyer/home'),
+                      icon: const Icon(Icons.home_rounded),
+                      label: const Text('Към началния екран'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: AppTheme.primaryGreen,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
     );
   }
 

@@ -107,6 +107,17 @@ final currentBuyerProvider = StreamProvider<Buyer?>((ref) {
   });
 });
 
+/// All seller profiles from Firestore (buyer map pins). Independent of HTTP listings API.
+final mapSellersProvider = StreamProvider<List<Seller>>((ref) {
+  return ref
+      .watch(firestoreProvider)
+      .collection('sellers')
+      .snapshots()
+      .map(
+        (snap) => snap.docs.map((d) => Seller.fromJson(d.data(), d.id)).toList(),
+      );
+});
+
 // ─── All Active Listings (Backend Powered) ───
 final activeListingsProvider = FutureProvider<List<Listing>>((ref) {
   return ref.watch(productServiceProvider).getAvailableListings();
@@ -326,11 +337,10 @@ final sellerReservationCitiesProvider = StreamProvider.family<SellerRouteInfo, S
 
     final buyerCityCache = <String, String>{};
 
-    Future<String?> buyerLocationRaw(String buyerId) async {
-      if (buyerId.isEmpty) return null;
+    Future<void> buyerLocationRaw(String buyerId) async {
+      if (buyerId.isEmpty) return;
       if (buyerCityCache.containsKey(buyerId)) {
-        final c = buyerCityCache[buyerId]!;
-        return c.isEmpty ? null : c;
+        return;
       }
       var raw = '';
       final userDoc = await firestore.collection('users').doc(buyerId).get();
@@ -354,7 +364,17 @@ final sellerReservationCitiesProvider = StreamProvider.family<SellerRouteInfo, S
         }
       }
       buyerCityCache[buyerId] = raw;
-      return raw.trim().isEmpty ? null : raw;
+    }
+
+    final buyerIds =
+        reservations.map((r) => r.buyerId).where((id) => id.isNotEmpty).toSet();
+    await Future.wait(buyerIds.map(buyerLocationRaw));
+
+    String? rawCityForBuyer(String buyerId) {
+      if (buyerId.isEmpty) return null;
+      final c = buyerCityCache[buyerId];
+      if (c == null || c.trim().isEmpty) return null;
+      return c;
     }
 
     final List<SellerRouteStop> stops = [];
@@ -375,7 +395,7 @@ final sellerReservationCitiesProvider = StreamProvider.family<SellerRouteInfo, S
     // One stop per reservation. Prefer **buyer’s** city (profile) so each stop can differ;
     // reservation/listing city often mirrors the offer location for every row.
     for (final r in reservations) {
-      String? city = AppConstants.resolveCityForMap(await buyerLocationRaw(r.buyerId));
+      String? city = AppConstants.resolveCityForMap(rawCityForBuyer(r.buyerId));
       city ??= AppConstants.resolveCityForMap(r.city);
       city ??= AppConstants.resolveCityForMap(listingCityById[r.listingId]);
       if (city != null) {
