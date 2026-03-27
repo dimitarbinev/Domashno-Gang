@@ -35,18 +35,18 @@ class StatusChip extends StatelessWidget {
   _StatusConfig _getConfig(String status) {
     switch (status) {
       case AppConstants.statusDraft:
-        return _StatusConfig('Draft', AppTheme.statusDraft);
+        return _StatusConfig('Чернова', AppTheme.statusDraft);
       case AppConstants.statusActive:
-        return _StatusConfig('Active', AppTheme.statusActive);
+        return _StatusConfig('Активна', AppTheme.statusActive);
       case AppConstants.statusThresholdReached:
-        return _StatusConfig('Threshold Reached', AppTheme.statusThresholdReached);
+        return _StatusConfig('Праг достигнат', AppTheme.statusThresholdReached);
       case AppConstants.statusGoConfirmed:
       case 'confirmed':
-        return _StatusConfig('GO Confirmed', AppTheme.statusGoConfirmed);
+        return _StatusConfig('Потвърдена', AppTheme.statusGoConfirmed);
       case AppConstants.statusCancelled:
-        return _StatusConfig('Cancelled', AppTheme.statusCancelled);
+        return _StatusConfig('Отменена', AppTheme.statusCancelled);
       case AppConstants.statusCompleted:
-        return _StatusConfig('Completed', AppTheme.statusCompleted);
+        return _StatusConfig('Завършена', AppTheme.statusCompleted);
       default:
         return _StatusConfig(status, AppTheme.statusDraft);
     }

@@ -213,7 +213,6 @@ class ProductService {
       'deposit': deposit,
     };
 
-    print('[ProductService] Placing order with payload: ${jsonEncode(payload)}');
 
     final response = await http.post(
       url,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'shared/services/storage_service.dart';
 import 'shared/providers/providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'features/auth/splash_screen.dart';
@@ -42,7 +41,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/',
-        redirect: (_, __) => '/splash',
+        redirect: (_, _) => '/splash',
       ),
       GoRoute(
         path: '/splash',

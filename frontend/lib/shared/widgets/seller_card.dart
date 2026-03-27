@@ -58,7 +58,7 @@ class SellerCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: AppTheme.textPrimary,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -68,9 +68,9 @@ class SellerCard extends StatelessWidget {
                       const SizedBox(width: 6),
                       Text(
                         rating.toStringAsFixed(1),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: AppTheme.textSecondary,
+                          color: Colors.white.withValues(alpha: 0.6),
                         ),
                       ),
                     ],
@@ -86,9 +86,9 @@ class SellerCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Text(
                         city,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
-                          color: AppTheme.textSecondary,
+                          color: Colors.white.withValues(alpha: 0.6),
                         ),
                       ),
                     ],
@@ -107,7 +107,7 @@ class SellerCard extends StatelessWidget {
                                 vertical: 3,
                               ),
                               decoration: BoxDecoration(
-                                color: AppTheme.primaryGreen.withValues(alpha: 0.15),
+                                color: AppTheme.accentGreen.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(
                                   AppTheme.radiusXLarge,
                                 ),
@@ -128,9 +128,9 @@ class SellerCard extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
+            Icon(
               Icons.chevron_right,
-              color: AppTheme.textTertiary,
+              color: Colors.white.withValues(alpha: 0.3),
             ),
           ],
         ),

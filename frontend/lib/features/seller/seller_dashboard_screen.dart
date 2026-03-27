@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../shared/widgets/listing_card.dart';
 import '../../shared/widgets/rating_stars.dart';
-import '../../shared/models/models.dart';
 import '../../shared/providers/providers.dart';
+import '../../shared/widgets/nature_scaffold.dart';
 
 class SellerDashboardScreen extends ConsumerWidget {
   const SellerDashboardScreen({super.key});
@@ -13,241 +13,244 @@ class SellerDashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authStateProvider).value;
-    if (user == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (user == null) return const NatureScaffold(body: Center(child: CircularProgressIndicator()));
     final userId = user.uid;
 
-    return Scaffold(
+    return NatureScaffold(
+      blur: 8.0,
+      overlayOpacity: 0.42,
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _showAddMenu(context),
-        backgroundColor: AppTheme.primaryGreen,
-        icon: const Icon(Icons.add),
-        label: const Text('New Session'),
+        backgroundColor: AppTheme.primaryGreen.withValues(alpha: 0.9),
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text('Нова сесия', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: AppTheme.primaryGradient,
-                    ),
-                    child: const Icon(Icons.person, color: Colors.white, size: 24),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: AppTheme.primaryGradient,
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 2),
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Good Morning',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: AppTheme.textSecondary,
+                  child: const Icon(Icons.person, color: Colors.white, size: 24),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Добро утро',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.white.withValues(alpha: 0.8),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      ref.watch(reactiveSellerProvider).when(
+                        data: (seller) => Text(
+                          seller?.name ?? 'Продавач',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
                           ),
                         ),
-                        ref.watch(reactiveSellerProvider).when(
-                          data: (seller) => Text(
-                            seller?.name ?? 'Seller',
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              color: AppTheme.textPrimary,
-                            ),
+                        loading: () => const Text(
+                          '...',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
                           ),
-                          loading: () => const Text(
-                            '...',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              color: AppTheme.textPrimary,
-                            ),
+                        ),
+                        error: (err, stack) => const Text(
+                          'Продавач',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
                           ),
-                          error: (_, __) => const Text(
-                            'Seller',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              color: AppTheme.textPrimary,
-                            ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                _NotifBell(onTap: () => context.go('/notifications')),
+              ],
+            ),
+            const SizedBox(height: 28),
+
+            // Summary Cards
+            ref.watch(sellerListingsProvider(userId)).when(
+              data: (listings) {
+                final activeCount = listings.where((l) => l.status == 'active' || l.status == 'confirmed').length;
+                final totalRequested = listings.fold<double>(0, (sum, l) => sum + l.requestedQuantity);
+
+                return Column(
+                  children: [
+                    GridView.count(
+                      crossAxisCount: 2,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: 1.5,
+                      children: [
+                        _MetricCard(
+                          icon: Icons.storefront_rounded,
+                          iconColor: AppTheme.statusActive,
+                          label: 'Активни обяви',
+                          value: '$activeCount',
+                        ),
+                        _MetricCard(
+                          icon: Icons.inventory_2_rounded,
+                          iconColor: AppTheme.accentGreen,
+                          label: 'Заявено кол.',
+                          value: '${totalRequested.toStringAsFixed(0)} кг',
+                        ),
+                        _MetricCard(
+                          icon: Icons.rate_review_rounded,
+                          iconColor: AppTheme.statusThresholdReached,
+                          label: 'Общо отзиви',
+                          value: ref.watch(reactiveSellerProvider).maybeWhen(
+                            data: (s) => '${s?.totalReviews ?? 0}',
+                            orElse: () => '0',
+                          ),
+                        ),
+                        _MetricCard(
+                          icon: Icons.star_rounded,
+                          iconColor: AppTheme.accentGreen,
+                          label: 'Ср. оценка',
+                          value: ref.watch(reactiveSellerProvider).maybeWhen(
+                            data: (s) => (s?.rating ?? 0.0).toStringAsFixed(1),
+                            orElse: () => '0.0',
                           ),
                         ),
                       ],
                     ),
-                  ),
-                  _NotifBell(onTap: () => context.go('/notifications')),
-                ],
-              ),
-              const SizedBox(height: 28),
+                    const SizedBox(height: 28),
 
-              // Summary Cards
-              ref.watch(sellerListingsProvider(userId)).when(
-                data: (listings) {
-                  final activeCount = listings.where((l) => l.status == 'active' || l.status == 'confirmed').length;
-                  final totalRequested = listings.fold<double>(0, (sum, l) => sum + l.requestedQuantity);
-
-                  return Column(
-                    children: [
-                      GridView.count(
-                        crossAxisCount: 2,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: 1.5,
-                        children: [
-                          _MetricCard(
-                            icon: Icons.storefront_rounded,
-                            iconColor: AppTheme.statusActive,
-                            label: 'Active Listings',
-                            value: '$activeCount',
-                          ),
-                          _MetricCard(
-                            icon: Icons.inventory_2_rounded,
-                            iconColor: AppTheme.accentGreen,
-                            label: 'Requested Qty',
-                            value: '${totalRequested.toStringAsFixed(0)} kg',
-                          ),
-                          _MetricCard(
-                            icon: Icons.rate_review_rounded,
-                            iconColor: AppTheme.statusThresholdReached,
-                            label: 'Total Reviews',
-                            value: ref.watch(reactiveSellerProvider).maybeWhen(
-                              data: (s) => '${s?.totalReviews ?? 0}',
-                              orElse: () => '0',
-                            ),
-                          ),
-                          _MetricCard(
-                            icon: Icons.star_rounded,
-                            iconColor: AppTheme.accentGreen,
-                            label: 'Avg Rating',
-                            value: ref.watch(reactiveSellerProvider).maybeWhen(
-                              data: (s) => (s?.rating ?? 0.0).toStringAsFixed(1),
-                              orElse: () => '0.0',
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 28),
-
-                      // Quick Actions
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _QuickAction(
-                              icon: Icons.add_circle_outline,
-                              label: 'Add Product',
-                              onTap: () => context.go('/seller/add-product'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickAction(
-                              icon: Icons.post_add_rounded,
-                              label: 'New Listing',
-                              onTap: () => context.go('/seller/create-listing'),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 28),
-
-                      // Recent Activity
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Upcoming Activity',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.textPrimary,
+                    // Quick Actions
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _QuickAction(
+                            icon: Icons.add_circle_outline,
+                            label: 'Добави продукт',
+                            onTap: () => context.go('/seller/add-product'),
                           ),
                         ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _QuickAction(
+                            icon: Icons.post_add_rounded,
+                            label: 'Нова обява',
+                            onTap: () => context.go('/seller/create-listing'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 28),
+
+                    // Recent Activity
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Предстояща активност',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                        ),
                       ),
-                      const SizedBox(height: 14),
-                      () {
-                        final today = DateTime.now();
-                        final startOfToday = DateTime(today.year, today.month, today.day);
-                        
-                        final sortedListings = listings
-                            .where((l) => l.endDate.isAfter(startOfToday.subtract(const Duration(seconds: 1))))
-                            .toList();
-                            
-                        sortedListings.sort((a, b) => a.startDate.compareTo(b.startDate));
-                        
-                        if (sortedListings.isEmpty) {
-                          return const Center(
+                    ),
+                    const SizedBox(height: 14),
+                    () {
+                      final today = DateTime.now();
+                      final startOfToday = DateTime(today.year, today.month, today.day);
+                      
+                      final sortedListings = listings
+                          .where((l) => l.endDate.isAfter(startOfToday.subtract(const Duration(seconds: 1))))
+                          .toList();
+                          
+                      sortedListings.sort((a, b) => a.startDate.compareTo(b.startDate));
+                      
+                      if (sortedListings.isEmpty) {
+                        return Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20),
+                            child: Text('Няма предстояща активност', style: TextStyle(color: Colors.white.withValues(alpha: 0.6))),
+                          ),
+                        );
+                      }
+                      
+                      return Column(
+                        children: sortedListings.take(3).map(
+                          (listing) => ListingCard(
+                            listing: listing,
+                            showSellerInfo: false,
+                            onTap: () => context.go('/seller/listing/${listing.id}'),
+                          ),
+                        ).toList(),
+                      );
+                    }(),
+                    const SizedBox(height: 28),
+
+                    // Recent Reviews
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Последни отзиви',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    ref.watch(myReviewsProvider).when(
+                      data: (reviews) {
+                        if (reviews.isEmpty) {
+                          return Center(
                             child: Padding(
-                              padding: EdgeInsets.symmetric(vertical: 20),
-                              child: Text('No upcoming activity', style: TextStyle(color: AppTheme.textSecondary)),
+                              padding: const EdgeInsets.symmetric(vertical: 20),
+                              child: Text('Все още няма отзиви', style: TextStyle(color: Colors.white.withValues(alpha: 0.6))),
                             ),
                           );
                         }
-                        
                         return Column(
-                          children: sortedListings.take(3).map(
-                            (listing) => ListingCard(
-                              listing: listing,
-                              showSellerInfo: false,
-                              onTap: () => context.go('/seller/listing/${listing.id}'),
+                          children: reviews.take(5).map((r) => Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(16),
+                            decoration: glassDecoration(),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(r.buyerName ?? 'Анонимен', style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
+                                    const Spacer(),
+                                    RatingStars(rating: r.rating, size: 14),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                Text(r.comment, style: const TextStyle(fontSize: 13, color: Colors.white, height: 1.4)),
+                              ],
                             ),
-                          ).toList(),
+                          )).toList(),
                         );
-                      }(),
-                      const SizedBox(height: 28),
-
-                      // Recent Reviews
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'Recent Reviews',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      ref.watch(myReviewsProvider).when(
-                        data: (reviews) {
-                          if (reviews.isEmpty) {
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(vertical: 20),
-                                child: Text('No reviews yet', style: TextStyle(color: AppTheme.textSecondary)),
-                              ),
-                            );
-                          }
-                          return Column(
-                            children: reviews.take(5).map((r) => Container(
-                              margin: const EdgeInsets.only(bottom: 10),
-                              padding: const EdgeInsets.all(14),
-                              decoration: glassDecoration(),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(r.buyerName ?? 'Anonymous', style: const TextStyle(fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
-                                      const Spacer(),
-                                      RatingStars(rating: r.rating, size: 14),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(r.comment, style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary, height: 1.4)),
-                                ],
-                              ),
-                            )).toList(),
-                          );
-                        },
-                        loading: () => const Center(child: CircularProgressIndicator()),
-                        error: (err, _) => Center(child: Text('Error: $err')),
-                      ),
-                      const SizedBox(height: 40),
+                      },
+                      loading: () => const Center(child: CircularProgressIndicator()),
+                      error: (err, _) => Center(child: Text('Error: $err', style: const TextStyle(color: Colors.white))),
+                    ),
+                    const SizedBox(height: 40),
                     ],
                   );
                 },
@@ -255,7 +258,6 @@ class SellerDashboardScreen extends ConsumerWidget {
                 error: (err, stack) => Center(child: Text('Error: $err')),
               ),
             ],
-          ),
         ),
       ),
     );
@@ -395,54 +397,6 @@ class _QuickAction extends StatelessWidget {
   }
 }
 
-// Demo data
-final _sampleListings = [
-  Listing(
-    id: '1',
-    sellerId: 's1',
-    productId: 'p1',
-    productName: 'Fresh Tomatoes',
-    productCategory: 'Vegetables',
-    city: 'Sofia',
-    startDate: DateTime.now().add(const Duration(days: 2)),
-    endDate: DateTime.now().add(const Duration(days: 5)),
-    pricePerKg: 3.50,
-    availableQuantity: 200,
-    minThreshold: 100,
-    requestedQuantity: 75,
-    status: 'active',
-  ),
-  Listing(
-    id: '2',
-    sellerId: 's1',
-    productId: 'p2',
-    productName: 'Organic Apples',
-    productCategory: 'Fruits',
-    city: 'Plovdiv',
-    startDate: DateTime.now().add(const Duration(days: 3)),
-    endDate: DateTime.now().add(const Duration(days: 6)),
-    pricePerKg: 2.80,
-    availableQuantity: 150,
-    minThreshold: 80,
-    requestedQuantity: 85,
-    status: 'threshold_reached',
-  ),
-  Listing(
-    id: '3',
-    sellerId: 's1',
-    productId: 'p3',
-    productName: 'Sunflower Honey',
-    productCategory: 'Honey',
-    city: 'Varna',
-    startDate: DateTime.now().add(const Duration(days: 5)),
-    endDate: DateTime.now().add(const Duration(days: 8)),
-    pricePerKg: 12.00,
-    availableQuantity: 50,
-    minThreshold: 30,
-    requestedQuantity: 10,
-    status: 'draft',
-  ),
-];
 
 void _showAddMenu(BuildContext context) {
   showModalBottomSheet(
@@ -450,9 +404,9 @@ void _showAddMenu(BuildContext context) {
     backgroundColor: Colors.transparent,
     builder: (context) => Container(
       padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(
-        color: AppTheme.cardSurface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      decoration: BoxDecoration(
+        color: AppTheme.cardSurface.withValues(alpha: 0.95),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -461,24 +415,24 @@ void _showAddMenu(BuildContext context) {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(2),
             ),
           ),
           const SizedBox(height: 24),
           const Text(
-            'Create New',
+            'Създай ново',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
-              color: AppTheme.textPrimary,
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 24),
           _AddMenuOption(
             icon: Icons.add_circle_outline,
-            title: 'Add New Product',
-            subtitle: 'Register a new item to your inventory',
+            title: 'Добави нов продукт',
+            subtitle: 'Регистрирай нов артикул в инвентара',
             onTap: () {
               Navigator.pop(context);
               context.go('/seller/add-product');
@@ -487,8 +441,8 @@ void _showAddMenu(BuildContext context) {
           const SizedBox(height: 12),
           _AddMenuOption(
             icon: Icons.post_add_rounded,
-            title: 'Create New Listing',
-            subtitle: 'Start a new group buying session',
+            title: 'Създай нова обява',
+            subtitle: 'Стартирай нова групова покупка',
             onTap: () {
               Navigator.pop(context);
               context.go('/seller/create-listing');
@@ -541,20 +495,20 @@ class _AddMenuOption extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
-                      color: AppTheme.textPrimary,
+                      color: Colors.white,
                     ),
                   ),
                   Text(
                     subtitle,
                     style: TextStyle(
                       fontSize: 13,
-                      color: AppTheme.textSecondary,
+                      color: Colors.white.withValues(alpha: 0.7),
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: AppTheme.textTertiary),
+            Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.3)),
           ],
         ),
       ),

@@ -5,11 +5,12 @@ import '../../core/theme.dart';
 import '../../shared/models/models.dart';
 import '../../shared/widgets/quantity_progress_bar.dart';
 import '../../shared/widgets/status_chip.dart';
-import '../../shared/widgets/ai_insight_card.dart';
 import '../../shared/widgets/go_decision_bar.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shared/providers/providers.dart';
+import '../../shared/widgets/nature_scaffold.dart';
+
 
 class SellerListingDetailScreen extends ConsumerWidget {
   final String listingId;
@@ -19,7 +20,7 @@ class SellerListingDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authStateProvider).value;
     if (user == null) {
-      return const Scaffold(body: Center(child: Text('Please log in')));
+      return const NatureScaffold(body: Center(child: Text('Моля, влезте в профила си', style: TextStyle(color: Colors.white))));
     }
 
     final listingsAsync = ref.watch(sellerListingsProvider(user.uid));
@@ -33,28 +34,32 @@ class SellerListingDetailScreen extends ConsumerWidget {
             );
 
         if (listing == null) {
-          return Scaffold(
+          return NatureScaffold(
             appBar: AppBar(
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back_rounded),
+                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
                 onPressed: () => context.go('/seller/dashboard'),
               ),
-              title: const Text('Listing Details'),
+              title: const Text('Детайли на обявата', style: TextStyle(color: Colors.white)),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
             ),
-            body: const Center(child: Text('Listing not found')),
+            body: const Center(child: Text('Обявата не е намерена', style: TextStyle(color: Colors.white))),
           );
         }
 
         final showGoCancel =
             listing.status == 'active' || listing.status == 'threshold_reached';
 
-        return Scaffold(
+        return NatureScaffold(
           appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded),
+              icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
               onPressed: () => context.go('/seller/dashboard'),
             ),
-            title: const Text('Listing Details'),
+            title: const Text('Детайли', style: TextStyle(color: Colors.white)),
             actions: [
               StatusChip(status: listing.status),
               const SizedBox(width: 16),
@@ -114,7 +119,7 @@ class SellerListingDetailScreen extends ConsumerWidget {
                               ],
                             ),
                             const SizedBox(height: 6),
-                            Text('${listing.pricePerKg.toStringAsFixed(2)} лв/kg',
+                            Text('${listing.pricePerKg.toStringAsFixed(2)} лв/кг',
                                 style: const TextStyle(
                                     fontSize: 22,
                                     fontWeight: FontWeight.w800,
@@ -134,7 +139,7 @@ class SellerListingDetailScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Demand Progress',
+                      const Text('Прогрес на търсенето',
                           style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
@@ -145,14 +150,14 @@ class SellerListingDetailScreen extends ConsumerWidget {
                         target: listing.minThreshold,
                         height: 12,
                         label:
-                            '${listing.requestedQuantity.toStringAsFixed(0)} / ${listing.minThreshold.toStringAsFixed(0)} kg requested',
+                            '${listing.requestedQuantity.toStringAsFixed(0)} / ${listing.minThreshold.toStringAsFixed(0)} кг заявено',
                       ),
                       const SizedBox(height: 10),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                              'Deposits: ${listing.depositsTotal.toStringAsFixed(2)} лв',
+                              'Депозити: ${listing.depositsTotal.toStringAsFixed(2)} лв',
                               style: const TextStyle(
                                   fontSize: 13, color: AppTheme.textSecondary)),
 
@@ -171,7 +176,7 @@ class SellerListingDetailScreen extends ConsumerWidget {
                       const Icon(Icons.category_outlined,
                           size: 20, color: AppTheme.accentGreen),
                       const SizedBox(width: 12),
-                      const Text('Category',
+                      const Text('Категория',
                           style: TextStyle(
                               fontSize: 14, color: AppTheme.textSecondary)),
                       const Spacer(),
@@ -192,11 +197,11 @@ class SellerListingDetailScreen extends ConsumerWidget {
                       const Icon(Icons.scale_outlined,
                           size: 20, color: AppTheme.accentGreen),
                       const SizedBox(width: 12),
-                      const Text('Min Threshold',
+                      const Text('Мин. праг',
                           style: TextStyle(
                               fontSize: 14, color: AppTheme.textSecondary)),
                       const Spacer(),
-                      Text('${listing.minThreshold.toStringAsFixed(0)} kg',
+                      Text('${listing.minThreshold.toStringAsFixed(0)} кг',
                           style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
@@ -214,14 +219,14 @@ class SellerListingDetailScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Reservations (${reservations.length})',
+                        Text('Резервации (${reservations.length})',
                             style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w800,
                                 color: AppTheme.textPrimary)),
                         const SizedBox(height: 18),
                         if (reservations.isEmpty)
-                          const Text('No reservations yet',
+                          const Text('Все още няма резервации',
                               style: TextStyle(color: AppTheme.textTertiary)),
                         ...reservations.map((r) => Padding(
                               padding: const EdgeInsets.only(bottom: 16),
@@ -243,14 +248,14 @@ class SellerListingDetailScreen extends ConsumerWidget {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(r.buyerName ?? 'Buyer',
+                                        Text(r.buyerName ?? 'Купувач',
                                             style: const TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.w700,
                                                 color: AppTheme.textPrimary)),
                                         const SizedBox(height: 2),
                                         Text(
-                                            '${r.quantity.toStringAsFixed(0)} kg · ${r.deposit.toStringAsFixed(2)} лв deposit',
+                                            '${r.quantity.toStringAsFixed(0)} кг · ${r.deposit.toStringAsFixed(2)} лв депозит',
                                             style: const TextStyle(
                                                 fontSize: 14,
                                                 color: AppTheme.textSecondary)),
@@ -265,7 +270,7 @@ class SellerListingDetailScreen extends ConsumerWidget {
                     ),
                   ),
                   loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Text('Error loading reservations: $e'),
+                  error: (e, _) => Text('Грешка при зареждане: $e'),
                 ),
                 const SizedBox(height: 16),
 
@@ -286,7 +291,7 @@ class SellerListingDetailScreen extends ConsumerWidget {
                       ref.invalidate(sellerListingsProvider(user.uid));
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Listing Confirmed! GO!')),
+                          const SnackBar(content: Text('Обявата е потвърдена! Старт!')),
                         );
                       }
                     } catch (e) {
@@ -309,7 +314,7 @@ class SellerListingDetailScreen extends ConsumerWidget {
                       if (context.mounted) {
                         context.go('/seller/dashboard');
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Listing Cancelled.')),
+                          const SnackBar(content: Text('Обявата е отменена.')),
                         );
                       }
                     } catch (e) {
@@ -324,8 +329,8 @@ class SellerListingDetailScreen extends ConsumerWidget {
               : null,
         );
       },
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (err, _) => Scaffold(body: Center(child: Text('Error: $err'))),
+      loading: () => const NatureScaffold(body: Center(child: CircularProgressIndicator())),
+      error: (err, _) => NatureScaffold(body: Center(child: Text('Error: $err', style: const TextStyle(color: Colors.white)))),
     );
   }
 }

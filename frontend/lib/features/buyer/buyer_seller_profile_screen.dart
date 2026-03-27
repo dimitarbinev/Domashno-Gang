@@ -6,6 +6,7 @@ import '../../shared/models/models.dart';
 import '../../shared/widgets/rating_stars.dart';
 import '../../shared/widgets/listing_card.dart';
 import '../../shared/providers/providers.dart';
+import '../../shared/widgets/nature_scaffold.dart';
 
 class BuyerSellerProfileScreen extends ConsumerWidget {
   final String sellerId;
@@ -23,13 +24,15 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
         final List<dynamic> reviewsData = data['reviews'] ?? [];
         final reviews = reviewsData.map((r) => Review.fromJson(r, r['id'] ?? '')).toList();
 
-        return Scaffold(
+        return NatureScaffold(
           appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded),
+              icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
               onPressed: () => context.go('/buyer/home'),
             ),
-            title: const Text('Seller Profile'),
+            title: const Text('Профил на продавач'),
             actions: [
               Consumer(
                 builder: (context, ref, child) {
@@ -40,7 +43,7 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
                       return IconButton(
                         icon: Icon(
                           isSaved ? Icons.favorite : Icons.favorite_border,
-                          color: isSaved ? AppTheme.statusCancelled : null,
+                          color: isSaved ? AppTheme.statusCancelled : Colors.white,
                         ),
                         onPressed: () async {
                           try {
@@ -56,7 +59,7 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
                       );
                     },
                     loading: () => const SizedBox.shrink(),
-                    error: (_, __) => const SizedBox.shrink(),
+                    error: (_, _) => const SizedBox.shrink(),
                   );
                 },
               ),
@@ -70,12 +73,16 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
                 // Avatar & info
                 Container(
                   width: 80, height: 80,
-                  decoration: BoxDecoration(shape: BoxShape.circle, gradient: AppTheme.primaryGradient),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle, 
+                    gradient: AppTheme.primaryGradient,
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 2),
+                  ),
                   child: const Icon(Icons.person, color: Colors.white, size: 40),
                 ),
                 const SizedBox(height: 14),
-                Text(profile['name'] ?? 'Seller', 
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppTheme.textPrimary)),
+                Text(profile['name'] ?? 'Продавач', 
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Colors.white)),
                 const SizedBox(height: 6),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -83,10 +90,10 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
                     RatingStars(rating: (profile['rating'] as num?)?.toDouble() ?? 0.0, size: 18),
                     const SizedBox(width: 8),
                     Text(profile['rating']?.toStringAsFixed(1) ?? '0.0', 
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
                     const SizedBox(width: 4),
-                    Text('(${profile['reviewCount'] ?? 0} reviews)', 
-                        style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary)),
+                    Text('(${profile['reviewCount'] ?? 0} отзива)', 
+                        style: TextStyle(fontSize: 13, color: Colors.white.withValues(alpha: 0.5))),
                   ],
                 ),
                 const SizedBox(height: 6),
@@ -95,8 +102,8 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
                   children: [
                     const Icon(Icons.location_on_outlined, size: 14, color: AppTheme.accentGreen),
                     const SizedBox(width: 4),
-                    Text(profile['mainCity'] ?? 'Unknown', 
-                        style: const TextStyle(fontSize: 14, color: AppTheme.textSecondary)),
+                    Text(profile['mainCity'] ?? 'Неизвестен', 
+                        style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.7))),
                   ],
                 ),
                 const SizedBox(height: 24),
@@ -104,13 +111,13 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
                 // Active Listings
                 const Align(
                   alignment: Alignment.centerLeft,
-                  child: Text('Active Listings', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+                  child: Text('Активни обяви', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
                 ),
                 const SizedBox(height: 12),
                 if (listings.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20),
-                    child: Text('No active listings found', style: TextStyle(color: AppTheme.textTertiary)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Text('Няма активни обяви', style: TextStyle(color: Colors.white.withValues(alpha: 0.4))),
                   )
                 else
                   ...listings.map((l) => ListingCard(
@@ -124,19 +131,20 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Reviews', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+                    const Text('Отзиви', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
                     TextButton.icon(
                       onPressed: () => _showReviewDialog(context, ref, sellerId),
                       icon: const Icon(Icons.add_comment_outlined, size: 18, color: AppTheme.accentGreen),
-                      label: const Text('Leave Review', style: TextStyle(color: AppTheme.accentGreen)),
+                      label: const Text('Остави отзив', style: TextStyle(color: AppTheme.accentGreen)),
                     ),
                   ],
                 ),
                 const SizedBox(height: 12),
                 if (reviews.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 20),
-                    child: Text('No reviews yet. Be the first to review!', style: TextStyle(color: AppTheme.textTertiary)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    child: Text('Все още няма отзиви. Бъдете първият!', 
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.4))),
                   )
                 else
                   ...reviews.map((r) => Container(
@@ -148,13 +156,13 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
                       children: [
                         Row(
                           children: [
-                            Text(r.buyerName ?? 'Anonymous', style: const TextStyle(fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
+                            Text(r.buyerName ?? 'Анонимен', style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white)),
                             const Spacer(),
                             RatingStars(rating: r.rating, size: 14),
                           ],
                         ),
                         const SizedBox(height: 8),
-                        Text(r.comment, style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary, height: 1.4)),
+                        Text(r.comment, style: TextStyle(fontSize: 13, color: Colors.white.withValues(alpha: 0.7), height: 1.4)),
                       ],
                     ),
                   )),
@@ -164,8 +172,8 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (err, _) => Scaffold(body: Center(child: Text('Error: $err'))),
+      loading: () => const NatureScaffold(body: Center(child: CircularProgressIndicator())),
+      error: (err, _) => NatureScaffold(body: Center(child: Text('Error: $err', style: const TextStyle(color: Colors.white)))),
     );
   }
 
@@ -177,12 +185,13 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (context, setState) => AlertDialog(
-          backgroundColor: AppTheme.cardSurface,
-          title: const Text('Rate Seller', style: TextStyle(color: AppTheme.textPrimary)),
+          backgroundColor: AppTheme.cardSurface.withValues(alpha: 0.95),
+          title: const Text('Оцени продавача', style: TextStyle(color: Colors.white)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('How was your experience?', style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+              Text('Какво е вашето впечатление?', 
+                  style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13)),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -201,10 +210,10 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
               TextField(
                 controller: commentController,
                 maxLines: 3,
-                style: const TextStyle(color: AppTheme.textPrimary),
+                style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  hintText: 'Share your feedback...',
-                  hintStyle: const TextStyle(color: AppTheme.textTertiary),
+                  hintText: 'Споделете мнението си...',
+                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
                   filled: true,
                   fillColor: Colors.white.withValues(alpha: 0.05),
                   border: OutlineInputBorder(
@@ -218,7 +227,7 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Cancel', style: TextStyle(color: AppTheme.textTertiary)),
+              child: Text('Отказ', style: TextStyle(color: Colors.white.withValues(alpha: 0.5))),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -236,7 +245,7 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
                   ref.invalidate(sellerProfileProvider(sellerId));
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Review submitted successfully!')),
+                      const SnackBar(content: Text('Отзивът е изпратен успешно!')),
                     );
                   }
                 } catch (e) {
@@ -247,7 +256,7 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
                   }
                 }
               },
-              child: const Text('Submit'),
+              child: const Text('Изпрати'),
             ),
           ],
         ),

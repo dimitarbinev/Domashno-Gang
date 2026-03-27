@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'storage_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -8,7 +7,6 @@ import 'package:http/http.dart' as http;
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
   final String _baseUrl = dotenv.env['BACKEND_URL'] ?? '';
   final StorageService? _storageService;
 
@@ -167,34 +165,6 @@ class AuthService {
   }
 
 
-
-  Future<void> _syncTokenWithBackend(User user, String endpoint, {Map<String, dynamic>? extraData}) async {
-    if (_baseUrl.isEmpty) return;
-
-    final token = await user.getIdToken();
-    final url = Uri.parse('$_baseUrl${endpoint.startsWith('/') ? endpoint.substring(1) : endpoint}');
-
-    final body = {
-      'idToken': token,
-      'uid': user.uid,
-      'email': user.email,
-      ...?extraData,
-    };
-
-    try {
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(body),
-      );
-
-      if (response.statusCode >= 400) {
-        // Backend sync failed
-      }
-    } catch (e) {
-      // Error syncing with backend
-    }
-  }
 
   Future<void> updateCredentials({
     String? name,

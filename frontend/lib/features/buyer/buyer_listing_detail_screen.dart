@@ -9,6 +9,7 @@ import '../../shared/widgets/rating_stars.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../shared/providers/providers.dart';
+import '../../shared/widgets/nature_scaffold.dart';
 
 class BuyerListingDetailScreen extends ConsumerStatefulWidget {
   final String listingId;
@@ -42,29 +43,31 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
         );
 
         if (listing == null) {
-          return Scaffold(
+          return NatureScaffold(
             appBar: AppBar(
-              backgroundColor: AppTheme.darkBackground,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back_rounded),
+                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
                 onPressed: () => context.go('/buyer/home'),
               ),
-              title: const Text('Listing Details'),
+              title: const Text('Детайли за обявата'),
             ),
-            body: const Center(child: Text('Listing not found')),
+            body: const Center(child: Text('Обявата не е намерена', style: TextStyle(color: Colors.white))),
           );
         }
 
-        return Scaffold(
+        return NatureScaffold(
           body: CustomScrollView(
             slivers: [
               // Product Image Header
               SliverAppBar(
                 expandedHeight: 240,
                 pinned: true,
-                backgroundColor: AppTheme.darkBackground,
+                backgroundColor: Colors.transparent,
+                elevation: 0,
                 leading: IconButton(
-                  icon:     Container(
+                  icon: Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.4),
@@ -84,12 +87,12 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              AppTheme.primaryGreen.withValues(alpha: 0.3),
-                              AppTheme.darkBackground,
+                              Colors.black.withValues(alpha: 0.4),
+                              Colors.transparent,
                             ],
                           ),
                         ),
-                        child: const Icon(Icons.eco, size: 80, color: AppTheme.accentGreen),
+                        child: Icon(Icons.eco, size: 80, color: AppTheme.accentGreen.withValues(alpha: 0.5)),
                       ),
                       Positioned(
                         bottom: 20, left: 20, right: 20,
@@ -146,7 +149,11 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
                             children: [
                               Container(
                                 width: 44, height: 44,
-                                decoration: BoxDecoration(shape: BoxShape.circle, gradient: AppTheme.primaryGradient),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle, 
+                                  gradient: AppTheme.primaryGradient,
+                                  border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
+                                ),
                                 child: const Icon(Icons.person, color: Colors.white, size: 22),
                               ),
                               const SizedBox(width: 12),
@@ -155,18 +162,18 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(listing.sellerName ?? 'Seller',
-                                        style: const TextStyle(fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+                                        style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white)),
                                     Row(children: [
                                       RatingStars(rating: listing.sellerRating ?? 0, size: 14),
                                       const SizedBox(width: 6),
                                       const Icon(Icons.location_on_outlined, size: 13, color: AppTheme.accentGreen),
                                       const SizedBox(width: 2),
-                                      Text(listing.city, style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                                      Text(listing.city, style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.6))),
                                     ]),
                                   ],
                                 ),
                               ),
-                              const Icon(Icons.chevron_right, color: AppTheme.textTertiary),
+                              Icon(Icons.chevron_right, color: Colors.white.withValues(alpha: 0.3)),
                             ],
                           ),
                         ),
@@ -174,7 +181,7 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
                       const SizedBox(height: 16),
 
                       // Price
-                      Text('${listing.pricePerKg.toStringAsFixed(2)} лв/kg',
+                      Text('${listing.pricePerKg.toStringAsFixed(2)} лв/кг',
                           style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppTheme.accentGreen)),
                       const SizedBox(height: 16),
 
@@ -186,10 +193,10 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
                         mainAxisSpacing: 10, crossAxisSpacing: 10,
                         childAspectRatio: 2.2,
                         children: [
-                          _InfoTile(label: 'Origin', value: listing.city),
-                          _InfoTile(label: 'Category', value: listing.productCategory),
-                          _InfoTile(label: 'Remaining', value: '${(listing.availableQuantity - listing.requestedQuantity).toStringAsFixed(0)} kg'),
-                          _InfoTile(label: 'Goal', value: '${listing.minThreshold.toStringAsFixed(0)} kg'),
+                          _InfoTile(label: 'Произход', value: listing.city),
+                          _InfoTile(label: 'Категория', value: listing.productCategory),
+                          _InfoTile(label: 'Остатък', value: '${(listing.availableQuantity - listing.requestedQuantity).toStringAsFixed(0)} кг'),
+                          _InfoTile(label: 'Цел', value: '${listing.minThreshold.toStringAsFixed(0)} кг'),
                         ],
                       ),
                       const SizedBox(height: 16),
@@ -203,7 +210,7 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
                             const Icon(Icons.calendar_today, size: 18, color: AppTheme.accentGreen),
                             const SizedBox(width: 10),
                             Text('${DateFormat('EEEE, MMM d').format(listing.startDate)} - ${DateFormat('MMM d').format(listing.endDate)}',
-                                style: const TextStyle(fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
+                                style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white)),
                           ],
                         ),
                       ),
@@ -216,17 +223,17 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text('Group Buying Progress',
+                            const Text('Прогрес на груповата покупка',
                                 style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
-                                    color: AppTheme.textPrimary)),
+                                    color: Colors.white)),
                             const SizedBox(height: 12),
                             QuantityProgressBar(
                               current: listing.requestedQuantity,
                               target: listing.minThreshold,
                               height: 12,
-                              label: '${listing.requestedQuantity.toStringAsFixed(0)} / ${listing.minThreshold.toStringAsFixed(0)} kg target',
+                              label: '${listing.requestedQuantity.toStringAsFixed(0)} / ${listing.minThreshold.toStringAsFixed(0)} кг цел',
                             ),
                           ],
                         ),
@@ -240,8 +247,8 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('Group Participants',
-                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+                              const Text('Участници в групата',
+                                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
                               const SizedBox(height: 14),
                               Container(
                                 padding: const EdgeInsets.all(16),
@@ -253,18 +260,18 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
                                       children: [
                                         CircleAvatar(
                                           radius: 16,
-                                          backgroundColor: AppTheme.accentGreen.withValues(alpha: 0.1),
-                                          child: const Icon(Icons.person, size: 18, color: AppTheme.accentGreen),
+                                          backgroundColor: Colors.white.withValues(alpha: 0.1),
+                                          child: const Icon(Icons.person, size: 18, color: Colors.white),
                                         ),
                                         const SizedBox(width: 12),
                                         Expanded(
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Text(r.buyerName ?? 'Participant',
-                                                  style: const TextStyle(fontWeight: FontWeight.w600, color: AppTheme.textPrimary)),
-                                              Text('${r.quantity.toStringAsFixed(0)} kg reserved',
-                                                  style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                                              Text(r.buyerName ?? 'Участник',
+                                                  style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.white)),
+                                              Text('${r.quantity.toStringAsFixed(0)} кг резервирани',
+                                                  style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.5))),
                                             ],
                                           ),
                                         ),
@@ -279,7 +286,7 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
                           );
                         },
                         loading: () => const SizedBox.shrink(),
-                        error: (_, __) => const SizedBox.shrink(),
+                        error: (_, _) => const SizedBox.shrink(),
                       ),
 
                       // Reserve Form
@@ -297,7 +304,7 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
                               Icon(Icons.cancel_outlined, color: Colors.red, size: 32),
                               SizedBox(height: 12),
                               Text(
-                                'This listing has been cancelled. Reservations are no longer accepted.',
+                                'Тази обява е отменена. Резервации не се приемат повече.',
                                 style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
                                 textAlign: TextAlign.center,
                               ),
@@ -305,8 +312,8 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
                           ),
                         )
                       else ...[
-                        const Text('Join the Group Buy',
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+                        const Text('Присъедини се към групата',
+                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white)),
                         const SizedBox(height: 14),
                         Container(
                           padding: const EdgeInsets.all(20),
@@ -316,35 +323,46 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
                               TextField(
                                 controller: _quantityController,
                                 keyboardType: TextInputType.number,
-                                style: const TextStyle(color: AppTheme.textPrimary),
-                                decoration: const InputDecoration(
-                                  labelText: 'Quantity (kg)',
-                                  prefixIcon: Icon(Icons.scale, size: 20),
+                                style: const TextStyle(color: Colors.white),
+                                decoration: InputDecoration(
+                                  labelText: 'Количество (кг)',
+                                  labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                                  prefixIcon: Icon(Icons.scale, size: 20, color: Colors.white.withValues(alpha: 0.6)),
+                                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.2))),
                                 ),
                               ),
                               const SizedBox(height: 14),
                               TextField(
                                 controller: _depositController,
                                 keyboardType: TextInputType.number,
-                                style: const TextStyle(color: AppTheme.textPrimary),
-                                decoration: const InputDecoration(
-                                  labelText: 'Deposit Amount (лв)',
-                                  prefixIcon: Icon(Icons.payments_outlined, size: 20),
+                                style: const TextStyle(color: Colors.white),
+                                decoration: InputDecoration(
+                                  labelText: 'Депозит (лв)',
+                                  labelStyle: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
+                                  prefixIcon: Icon(Icons.payments_outlined, size: 20, color: Colors.white.withValues(alpha: 0.6)),
+                                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.2))),
                                 ),
                               ),
                               const SizedBox(height: 20),
                               SizedBox(
                                 width: double.infinity, height: 52,
-                                child:     Container(
+                                child: Container(
                                   decoration: BoxDecoration(
                                     gradient: AppTheme.primaryGradient,
                                     borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppTheme.accentGreen.withValues(alpha: 0.3),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
                                   ),
                                   child: ElevatedButton.icon(
                                     onPressed: () async {
                                       if (_quantityController.text.isEmpty || _depositController.text.isEmpty) {
                                         ScaffoldMessenger.of(context).showSnackBar(
-                                          const SnackBar(content: Text('Please fill all fields')),
+                                          const SnackBar(content: Text('Моля, попълнете всички полета')),
                                         );
                                         return;
                                       }
@@ -355,7 +373,7 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
 
                                         if (quantity <= 0 || deposit < 0) {
                                           ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Quantity must be greater than 0')),
+                                            const SnackBar(content: Text('Количеството трябва да е по-голямо от 0')),
                                           );
                                           return;
                                         }
@@ -373,7 +391,7 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
 
                                         if (mounted) {
                                           ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Reservation submitted successfully!')),
+                                            const SnackBar(content: Text('Резервацията е подадена успешно!')),
                                           );
                                           // Clear controllers instead of navigating away
                                           _quantityController.clear();
@@ -389,10 +407,12 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
                                       }
                                     },
                                     icon: const Icon(Icons.check_circle_outline),
-                                    label: const Text('Submit Reservation'),
+                                    label: const Text('Подай резервация'),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.transparent,
                                       shadowColor: Colors.transparent,
+                                      foregroundColor: Colors.white,
+                                      elevation: 0,
                                     ),
                                   ),
                                 ),
@@ -406,8 +426,8 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
                       // AI Insight
                       AIInsightCard(
                          icon: Icons.lightbulb_outline,
-                         title: "Group Buy Tip",
-                         body: "Group buying for this listing is moving fast! Join now to ensure you reach the target threshold.",
+                       title: "Съвет за групова покупка",
+                         body: "Груповото купуване за тази обява напредва бързо! Присъединете се сега.",
                       ),
                       
                       const SizedBox(height: 40),
@@ -419,8 +439,8 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
           ),
         );
       },
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (err, _) => Scaffold(body: Center(child: Text('Error: $err'))),
+      loading: () => const NatureScaffold(body: Center(child: CircularProgressIndicator())),
+      error: (err, _) => NatureScaffold(body: Center(child: Text('Error: $err', style: const TextStyle(color: Colors.white)))),
     );
   }
 }
@@ -438,9 +458,9 @@ class _InfoTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(label, style: const TextStyle(fontSize: 11, color: AppTheme.textTertiary)),
+          Text(label, style: TextStyle(fontSize: 11, color: Colors.white.withValues(alpha: 0.5))),
           const SizedBox(height: 4),
-          Text(value, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+          Text(value, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white)),
         ],
       ),
     );

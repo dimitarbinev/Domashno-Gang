@@ -32,14 +32,14 @@ class GoDecisionBar extends StatelessWidget {
             Expanded(
               flex: 2,
               child: _DecisionButton(
-                label: 'CANCEL',
+                label: 'ОТМЕНИ',
                 icon: Icons.close_rounded,
                 color: AppTheme.statusCancelled,
                 onPressed: enabled
                     ? () => _showConfirmation(
                           context,
-                          'Cancel Listing',
-                          'Are you sure you want to cancel this listing? Buyers will be notified.',
+                          'Отмяна на обявата',
+                          'Сигурни ли сте, че искате да отмените тази обява? Купувачите ще бъдат уведомени.',
                           onCancel,
                           isDestructive: true,
                         )
@@ -50,15 +50,15 @@ class GoDecisionBar extends StatelessWidget {
             Expanded(
               flex: 1,
               child: _DecisionButton(
-                label: 'GO',
+                label: 'СТАРТ',
                 icon: Icons.check_rounded,
                 color: AppTheme.statusGoConfirmed,
                 isPrimary: true,
                 onPressed: enabled
                     ? () => _showConfirmation(
                           context,
-                          'Confirm GO',
-                          'Confirm that you will travel to sell at this location. All buyers will be notified.',
+                          'Потвърди СТАРТ',
+                          'Потвърдете, че ще пътувате да продавате на това място. Всички купувачи ще бъдат уведомени.',
                           onGo,
                         )
                     : null,
@@ -88,7 +88,7 @@ class GoDecisionBar extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Back'),
+            child: const Text('Назад'),
           ),
           ElevatedButton(
             onPressed: () {

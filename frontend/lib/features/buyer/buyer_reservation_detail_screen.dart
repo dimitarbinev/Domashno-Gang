@@ -6,6 +6,7 @@ import '../../core/theme.dart';
 import '../../shared/models/models.dart';
 import '../../shared/providers/providers.dart';
 import '../../shared/widgets/status_chip.dart';
+import '../../shared/widgets/nature_scaffold.dart';
 
 class BuyerReservationDetailScreen extends ConsumerWidget {
   final String reservationId;
@@ -23,27 +24,31 @@ class BuyerReservationDetailScreen extends ConsumerWidget {
             );
 
         if (reservation == null) {
-          return Scaffold(
+          return NatureScaffold(
             appBar: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back_rounded),
+                icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
                 onPressed: () => context.go('/buyer/reservations'),
               ),
-              title: const Text('Reservation Details'),
+              title: const Text('Детайли за резервация'),
             ),
-            body: const Center(child: Text('Reservation not found')),
+            body: const Center(child: Text('Резервацията не е намерена', style: TextStyle(color: Colors.white))),
           );
         }
 
         final canCancel = reservation.status == 'pending';
 
-        return Scaffold(
+        return NatureScaffold(
           appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
             leading: IconButton(
-              icon: const Icon(Icons.arrow_back_rounded),
+              icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
               onPressed: () => context.go('/buyer/reservations'),
             ),
-            title: const Text('Reservation Details'),
+            title: const Text('Детайли за резервация'),
             actions: [
               StatusChip(status: reservation.status),
               const SizedBox(width: 16),
@@ -65,7 +70,7 @@ class BuyerReservationDetailScreen extends ConsumerWidget {
                         height: 64,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                          color: AppTheme.cardSurfaceLight,
+                          color: Colors.white.withValues(alpha: 0.1),
                         ),
                         child: const Icon(Icons.shopping_basket_outlined,
                             color: AppTheme.accentGreen, size: 32),
@@ -75,15 +80,15 @@ class BuyerReservationDetailScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(reservation.productName ?? 'Product',
+                            Text(reservation.productName ?? 'Продукт',
                                 style: const TextStyle(
                                     fontSize: 20,
                                     fontWeight: FontWeight.w800,
-                                    color: AppTheme.textPrimary)),
+                                    color: Colors.white)),
                             const SizedBox(height: 4),
-                            Text(reservation.city ?? 'Local',
-                                style: const TextStyle(
-                                    fontSize: 14, color: AppTheme.textSecondary)),
+                            Text(reservation.city ?? 'Местно',
+                                style: TextStyle(
+                                    fontSize: 14, color: Colors.white.withValues(alpha: 0.6))),
                           ],
                         ),
                       ),
@@ -100,25 +105,25 @@ class BuyerReservationDetailScreen extends ConsumerWidget {
                     children: [
                       _DetailRow(
                         icon: Icons.scale_outlined,
-                        label: 'Quantity',
-                        value: '${reservation.quantity.toStringAsFixed(0)} kg',
+                        label: 'Количество',
+                        value: '${reservation.quantity.toStringAsFixed(0)} кг',
                       ),
                       const Divider(height: 32, color: Colors.white10),
                       _DetailRow(
                         icon: Icons.payments_outlined,
-                        label: 'Price per kg',
+                        label: 'Цена за кг',
                         value: '${(reservation.pricePerKg ?? 0).toStringAsFixed(2)} лв',
                       ),
                       const Divider(height: 32, color: Colors.white10),
                       _DetailRow(
                         icon: Icons.account_balance_wallet_outlined,
-                        label: 'Deposit Paid',
+                        label: 'Платен депозит',
                         value: '${reservation.deposit.toStringAsFixed(2)} лв',
                       ),
                       const Divider(height: 32, color: Colors.white10),
                       _DetailRow(
                         icon: Icons.calendar_today_outlined,
-                        label: 'Created On',
+                        label: 'Създадено на',
                         value: DateFormat('MMM d, yyyy').format(reservation.createdAt),
                       ),
                     ],
@@ -127,11 +132,11 @@ class BuyerReservationDetailScreen extends ConsumerWidget {
                 const SizedBox(height: 24),
 
                 // Availability Range
-                const Text('Collection Window',
+                const Text('Период за получаване',
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: AppTheme.textPrimary)),
+                        color: Colors.white)),
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(20),
@@ -142,7 +147,7 @@ class BuyerReservationDetailScreen extends ConsumerWidget {
                       const SizedBox(width: 16),
                       Text(
                         '${DateFormat('MMM d').format(reservation.startDate)} - ${DateFormat('MMM d, yyyy').format(reservation.endDate)}',
-                        style: const TextStyle(fontSize: 16, color: AppTheme.textPrimary),
+                        style: const TextStyle(fontSize: 16, color: Colors.white),
                       ),
                     ],
                   ),
@@ -157,12 +162,13 @@ class BuyerReservationDetailScreen extends ConsumerWidget {
                     child: ElevatedButton(
                       onPressed: () => _showCancelDialog(context, ref, reservation.id),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.statusCancelled.withValues(alpha: 0.1),
-                        foregroundColor: AppTheme.statusCancelled,
+                        backgroundColor: Colors.red.withValues(alpha: 0.1),
+                        foregroundColor: Colors.redAccent,
                         elevation: 0,
-                        side: const BorderSide(color: AppTheme.statusCancelled, width: 1),
+                        side: const BorderSide(color: Colors.redAccent, width: 1),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMedium)),
                       ),
-                      child: const Text('Cancel Reservation',
+                      child: const Text('Откажи резервация',
                           style: TextStyle(fontWeight: FontWeight.w700)),
                     ),
                   ),
@@ -173,8 +179,8 @@ class BuyerReservationDetailScreen extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
-      error: (err, _) => Scaffold(body: Center(child: Text('Error: $err'))),
+      loading: () => const NatureScaffold(body: Center(child: CircularProgressIndicator())),
+      error: (err, _) => NatureScaffold(body: Center(child: Text('Error: $err', style: const TextStyle(color: Colors.white)))),
     );
   }
 
@@ -182,16 +188,16 @@ class BuyerReservationDetailScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppTheme.cardSurface,
-        title: const Text('Cancel Reservation?', style: TextStyle(color: AppTheme.textPrimary)),
-        content: const Text(
-          'Are you sure you want to cancel this reservation? This action cannot be undone.',
-          style: TextStyle(color: AppTheme.textSecondary),
+        backgroundColor: AppTheme.cardSurface.withValues(alpha: 0.95),
+        title: const Text('Отказване на резервация?', style: TextStyle(color: Colors.white)),
+        content: Text(
+          'Сигурни ли сте, че искате да откажете тази резервация? Това действие не може да бъде отменено.',
+          style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Wait, no', style: TextStyle(color: AppTheme.textTertiary)),
+            child: Text('Не, почакай', style: TextStyle(color: Colors.white.withValues(alpha: 0.5))),
           ),
           TextButton(
             onPressed: () async {
@@ -202,7 +208,7 @@ class BuyerReservationDetailScreen extends ConsumerWidget {
                 if (context.mounted) {
                   context.go('/buyer/reservations');
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Reservation cancelled successfully')),
+                    const SnackBar(content: Text('Резервацията е отказана успешно')),
                   );
                 }
               } catch (e) {
@@ -213,7 +219,7 @@ class BuyerReservationDetailScreen extends ConsumerWidget {
                 }
               }
             },
-            child: const Text('Yes, Cancel', style: TextStyle(color: AppTheme.statusCancelled)),
+            child: const Text('Да, откажи', style: TextStyle(color: Colors.redAccent)),
           ),
         ],
       ),
@@ -234,11 +240,11 @@ class _DetailRow extends StatelessWidget {
       children: [
         Icon(icon, size: 20, color: AppTheme.accentGreen),
         const SizedBox(width: 12),
-        Text(label, style: const TextStyle(fontSize: 14, color: AppTheme.textSecondary)),
+        Text(label, style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.6))),
         const Spacer(),
         Text(value,
             style: const TextStyle(
-                fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+                fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
       ],
     );
   }

@@ -3,15 +3,16 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  // ─── Brand Colors ───
+  // ─── Brand Colors (Nature-Inspired) ───
   static const Color primaryGreen = Color(0xFF2E7D32);
   static const Color accentGreen = Color(0xFF66BB6A);
-  static const Color darkBackground = Color(0xFF0F1214);
-  static const Color cardSurface = Color(0xFF1A1D21);
-  static const Color cardSurfaceLight = Color(0xFF242830);
-  static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecondary = Color(0xFF9E9E9E);
-  static const Color textTertiary = Color(0xFF6B6B6B);
+  static const Color accentGold = Color(0xFFC5A55A);
+  static const Color darkBackground = Color(0xFF1B2E1B);
+  static const Color cardSurface = Color(0xFF1E2E1E);
+  static const Color cardSurfaceLight = Color(0xFF2A3D2A);
+  static const Color textPrimary = Color(0xFFF5F0E8);
+  static const Color textSecondary = Color(0xFFB0C4A8);
+  static const Color textTertiary = Color(0xFF6B8A60);
 
   // ─── Status Colors ───
   static const Color statusDraft = Color(0xFF757575);
@@ -35,9 +36,15 @@ class AppTheme {
   );
 
   static const LinearGradient cardGradient = LinearGradient(
-    colors: [Color(0xFF1A1D21), Color(0xFF1E2328)],
+    colors: [Color(0xFF1E2E1E), Color(0xFF243424)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient natureGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Color(0xFF1B2E1B), Color(0xFF152015), Color(0xFF1B2E1B)],
   );
 
   // ─── Shadows ───
@@ -50,10 +57,10 @@ class AppTheme {
   ];
 
   // ─── Border Radius ───
-  static const double radiusSmall = 8.0;
-  static const double radiusMedium = 12.0;
-  static const double radiusLarge = 16.0;
-  static const double radiusXLarge = 20.0;
+  static const double radiusSmall = 10.0;
+  static const double radiusMedium = 14.0;
+  static const double radiusLarge = 20.0;
+  static const double radiusXLarge = 28.0;
   static const double radiusRound = 100.0;
 
   // ─── Theme Data ───
@@ -61,6 +68,7 @@ class AppTheme {
     final colorScheme = ColorScheme.dark(
       primary: primaryGreen,
       secondary: accentGreen,
+      tertiary: accentGold,
       surface: cardSurface,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
@@ -76,7 +84,7 @@ class AppTheme {
       fontFamily: 'Inter',
       // ─── AppBar ───
       appBarTheme: const AppBarTheme(
-        backgroundColor: darkBackground,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
@@ -118,7 +126,7 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: textPrimary,
-          side: const BorderSide(color: textTertiary),
+          side: BorderSide(color: accentGreen.withValues(alpha: 0.4)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(radiusMedium),
@@ -133,7 +141,7 @@ class AppTheme {
       // ─── Text Button ───
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: accentGreen,
+          foregroundColor: accentGold,
           textStyle: const TextStyle(
             fontFamily: 'Inter',
             fontSize: 14,
@@ -144,7 +152,7 @@ class AppTheme {
       // ─── Input Fields ───
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: cardSurfaceLight,
+        fillColor: cardSurfaceLight.withValues(alpha: 0.6),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
@@ -153,11 +161,11 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMedium),
-          borderSide: BorderSide(color: textTertiary.withValues(alpha: 0.3)),
+          borderSide: BorderSide(color: accentGreen.withValues(alpha: 0.15)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMedium),
-          borderSide: const BorderSide(color: primaryGreen, width: 1.5),
+          borderSide: const BorderSide(color: accentGreen, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMedium),
@@ -190,18 +198,18 @@ class AppTheme {
         ),
       ),
       // ─── Bottom Navigation ───
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: cardSurface,
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: cardSurface.withValues(alpha: 0.95),
         selectedItemColor: accentGreen,
         unselectedItemColor: textTertiary,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
-        selectedLabelStyle: TextStyle(
+        selectedLabelStyle: const TextStyle(
           fontFamily: 'Inter',
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
-        unselectedLabelStyle: TextStyle(
+        unselectedLabelStyle: const TextStyle(
           fontFamily: 'Inter',
           fontSize: 12,
           fontWeight: FontWeight.w400,
@@ -217,7 +225,7 @@ class AppTheme {
       ),
       // ─── Divider ───
       dividerTheme: DividerThemeData(
-        color: textTertiary.withValues(alpha: 0.2),
+        color: accentGreen.withValues(alpha: 0.12),
         thickness: 1,
       ),
       // ─── Dialog ───
@@ -238,15 +246,16 @@ class AppTheme {
 
   // ─── Light Theme ───
   static ThemeData get lightTheme {
-    const Color bg = Color(0xFFF5F7F5);
+    const Color bg = Color(0xFFF0F5EC);
     const Color surface = Color(0xFFFFFFFF);
-    const Color surfaceLight = Color(0xFFEEF2EE);
-    const Color onSurface = Color(0xFF1A1A1A);
-    const Color onSurfaceSecondary = Color(0xFF555555);
+    const Color surfaceLight = Color(0xFFE8F0E4);
+    const Color onSurface = Color(0xFF1A2E1A);
+    const Color onSurfaceSecondary = Color(0xFF4A6040);
 
     final colorScheme = ColorScheme.light(
       primary: primaryGreen,
       secondary: accentGreen,
+      tertiary: accentGold,
       surface: surface,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
@@ -261,7 +270,7 @@ class AppTheme {
       scaffoldBackgroundColor: bg,
       fontFamily: 'Inter',
       appBarTheme: const AppBarTheme(
-        backgroundColor: bg,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
@@ -345,22 +354,23 @@ class AppTheme {
   }
 }
 
-// ─── Glassmorphism Decoration ───
+// ─── Glassmorphism Decoration (Nature-tinted) ───
 BoxDecoration glassDecoration({
-  double borderRadius = AppTheme.radiusLarge,
+  double radius = AppTheme.radiusLarge,
   Color? color,
+  double alpha = 0.78,
 }) {
   return BoxDecoration(
-    borderRadius: BorderRadius.circular(borderRadius),
-    color: (color ?? AppTheme.cardSurface).withValues(alpha: 0.85),
+    borderRadius: BorderRadius.circular(radius),
+    color: (color ?? AppTheme.cardSurface).withValues(alpha: alpha),
     border: Border.all(
-      color: Colors.white.withValues(alpha: 0.08),
+      color: AppTheme.accentGreen.withValues(alpha: 0.10),
       width: 1,
     ),
     boxShadow: [
       BoxShadow(
-        color: Colors.black.withValues(alpha: 0.2),
-        blurRadius: 16,
+        color: Colors.black.withValues(alpha: 0.25),
+        blurRadius: 20,
         offset: const Offset(0, 4),
       ),
     ],

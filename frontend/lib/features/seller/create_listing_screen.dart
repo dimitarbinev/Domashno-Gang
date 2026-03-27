@@ -6,6 +6,7 @@ import '../../core/theme.dart';
 import '../../core/constants.dart';
 import '../../shared/providers/providers.dart';
 import '../../shared/models/models.dart';
+import '../../shared/widgets/nature_scaffold.dart';
 
 class CreateListingScreen extends ConsumerStatefulWidget {
   const CreateListingScreen({super.key});
@@ -44,6 +45,7 @@ class _CreateListingScreenState extends ConsumerState<CreateListingScreen> {
           colorScheme: AppTheme.darkTheme.colorScheme.copyWith(
             primary: AppTheme.primaryGreen,
             surface: AppTheme.cardSurface,
+            onSurface: Colors.white,
           ),
         ),
         child: child!,
@@ -70,7 +72,7 @@ class _CreateListingScreenState extends ConsumerState<CreateListingScreen> {
         _startDate == null ||
         _endDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
+        const SnackBar(content: Text('Моля, попълнете всички полета')),
       );
       return;
     }
@@ -87,14 +89,14 @@ class _CreateListingScreenState extends ConsumerState<CreateListingScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Listing created successfully')),
+          const SnackBar(content: Text('Обявата е създадена успешно')),
         );
         context.go('/seller/dashboard');
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to create listing: ${e.toString()}')),
+          SnackBar(content: Text('Неуспешно създаване: ${e.toString()}')),
         );
       }
     } finally {
@@ -108,13 +110,15 @@ class _CreateListingScreenState extends ConsumerState<CreateListingScreen> {
   Widget build(BuildContext context) {
     final productsAsync = ref.watch(sellerProductsProvider);
 
-    return Scaffold(
+    return NatureScaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
           onPressed: () => context.go('/seller/dashboard'),
         ),
-        title: const Text('Create Listing'),
+        title: const Text('Създай обява'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -124,17 +128,17 @@ class _CreateListingScreenState extends ConsumerState<CreateListingScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Product selection
+              _buildFieldLabel('Избери продукт'),
               productsAsync.when(
                 data: (products) => DropdownButtonFormField<Product>(
-                  value: _selectedProduct,
-                  decoration: const InputDecoration(
-                    labelText: 'Select Product',
-                    prefixIcon: Icon(Icons.eco, size: 20),
+                  initialValue: _selectedProduct,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: _inputDecoration('Продукт').copyWith(
+                    prefixIcon: const Icon(Icons.eco, size: 20, color: AppTheme.accentGreen),
                   ),
-                  dropdownColor: AppTheme.cardSurface,
+                  dropdownColor: Colors.black87,
                   items: products
-                      .map((p) => DropdownMenuItem(value: p, child: Text(p.name)))
+                      .map((p) => DropdownMenuItem(value: p, child: Text(p.name, style: const TextStyle(color: Colors.white))))
                       .toList(),
                   onChanged: (v) {
                     setState(() {
@@ -146,90 +150,126 @@ class _CreateListingScreenState extends ConsumerState<CreateListingScreen> {
                   },
                 ),
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (err, _) => Text('Error loading products: $err',
+                error: (err, _) => Text('Грешка при зареждане: $err',
                     style: const TextStyle(color: Colors.red)),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
 
-
+              _buildFieldLabel('Град'),
               DropdownButtonFormField<String>(
-                value: _selectedCity,
-                decoration: const InputDecoration(
-                  labelText: 'City',
-                  prefixIcon: Icon(Icons.location_on_outlined, size: 20),
+                initialValue: _selectedCity,
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDecoration('Избери град').copyWith(
+                  prefixIcon: const Icon(Icons.location_on_outlined, size: 20, color: AppTheme.accentGreen),
                 ),
-                dropdownColor: AppTheme.cardSurface,
+                dropdownColor: Colors.black87,
                 items: AppConstants.cities
-                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                    .map((c) => DropdownMenuItem(value: c, child: Text(c, style: const TextStyle(color: Colors.white))))
                     .toList(),
                 onChanged: (v) => setState(() => _selectedCity = v),
               ),
-              const SizedBox(height: 16),
-              const SizedBox(height: 16),
+              const SizedBox(height: 18),
 
-              // Date range
               Row(
                 children: [
                   Expanded(
-                    child: GestureDetector(
-                      onTap: () => _pickDate(true),
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'Start Date',
-                          prefixIcon: Icon(Icons.calendar_today, size: 20),
-                        ),
-                        child: Text(
-                          _startDate != null
-                              ? DateFormat('MMM d, y').format(_startDate!)
-                              : 'Start',
-                          style: TextStyle(
-                            color: _startDate != null
-                                ? AppTheme.textPrimary
-                                : AppTheme.textTertiary,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildFieldLabel('Начална дата'),
+                        GestureDetector(
+                          onTap: () => _pickDate(true),
+                          child: Container(
+                            height: 48,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.calendar_today, size: 18, color: AppTheme.accentGreen),
+                                const SizedBox(width: 12),
+                                Text(
+                                  _startDate != null
+                                      ? DateFormat('MMM d, y').format(_startDate!)
+                                      : 'Начало',
+                                  style: TextStyle(
+                                    color: _startDate != null
+                                        ? Colors.white
+                                        : Colors.white.withValues(alpha: 0.3),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: GestureDetector(
-                      onTap: () => _pickDate(false),
-                      child: InputDecorator(
-                        decoration: const InputDecoration(
-                          labelText: 'End Date',
-                          prefixIcon: Icon(Icons.calendar_today, size: 20),
-                        ),
-                        child: Text(
-                          _endDate != null
-                              ? DateFormat('MMM d, y').format(_endDate!)
-                              : 'End',
-                          style: TextStyle(
-                            color: _endDate != null
-                                ? AppTheme.textPrimary
-                                : AppTheme.textTertiary,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildFieldLabel('Крайна дата'),
+                        GestureDetector(
+                          onTap: () => _pickDate(false),
+                          child: Container(
+                            height: 48,
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(Icons.calendar_today, size: 18, color: AppTheme.accentGreen),
+                                const SizedBox(width: 12),
+                                Text(
+                                  _endDate != null
+                                      ? DateFormat('MMM d, y').format(_endDate!)
+                                      : 'Край',
+                                  style: TextStyle(
+                                    color: _endDate != null
+                                        ? Colors.white
+                                        : Colors.white.withValues(alpha: 0.3),
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-
-
+              const SizedBox(height: 32),
 
               Container(
                 height: 52,
                 decoration: BoxDecoration(
                   gradient: AppTheme.primaryGradient,
                   borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryGreen.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _handleCreate,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMedium)),
                   ),
                   child: _isLoading
                       ? const SizedBox(
@@ -240,12 +280,49 @@ class _CreateListingScreenState extends ConsumerState<CreateListingScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : const Text('Create Listing'),
+                      : const Text('Създай обява',
+                          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFieldLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.8),
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 14),
+      filled: true,
+      fillColor: Colors.white.withValues(alpha: 0.05),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppTheme.accentGreen, width: 1),
       ),
     );
   }

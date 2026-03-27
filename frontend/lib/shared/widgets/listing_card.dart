@@ -68,7 +68,7 @@ class ListingCard extends StatelessWidget {
                                 style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
-                                  color: AppTheme.textPrimary,
+                                  color: Colors.white,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -79,26 +79,26 @@ class ListingCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         if (showSellerInfo && listing.sellerName != null) ...[
-                          Row(
-                            children: [
-                              Text(
-                                listing.sellerName!,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: AppTheme.textSecondary,
-                                ),
+                              Row(
+                                children: [
+                                  Text(
+                                    listing.sellerName!,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.white.withValues(alpha: 0.7),
+                                    ),
+                                  ),
+                                  if (listing.sellerRating != null) ...[
+                                    const SizedBox(width: 8),
+                                    RatingStars(
+                                      rating: listing.sellerRating!,
+                                      size: 12,
+                                    ),
+                                  ],
+                                ],
                               ),
-                              if (listing.sellerRating != null) ...[
-                                const SizedBox(width: 8),
-                                RatingStars(
-                                  rating: listing.sellerRating!,
-                                  size: 12,
-                                ),
-                              ],
+                              const SizedBox(height: 4),
                             ],
-                          ),
-                          const SizedBox(height: 4),
-                        ],
                         Row(
                           children: [
                             const Icon(
@@ -146,7 +146,7 @@ class ListingCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          '${listing.pricePerKg.toStringAsFixed(2)} лв/kg',
+                          '${listing.pricePerKg.toStringAsFixed(2)} лв/кг',
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
@@ -175,18 +175,25 @@ class ListingCard extends StatelessWidget {
 
   IconData _getCategoryIcon(String category) {
     switch (category.toLowerCase()) {
+      case 'зеленчуци':
       case 'vegetables':
         return Icons.eco;
+      case 'плодове':
       case 'fruits':
         return Icons.apple;
+      case 'зърнени':
       case 'grains':
         return Icons.grain;
+      case 'млечни':
       case 'dairy':
         return Icons.water_drop;
+      case 'билки':
       case 'herbs':
         return Icons.local_florist;
+      case 'месо':
       case 'meat':
         return Icons.restaurant;
+      case 'яйца':
       case 'eggs':
         return Icons.egg;
       default:
