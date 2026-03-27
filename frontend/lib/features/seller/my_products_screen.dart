@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../shared/models/models.dart';
 import '../../shared/providers/providers.dart';
@@ -19,7 +20,13 @@ class MyProductsScreen extends ConsumerWidget {
         title: const Text('Моите продукти'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+              return;
+            }
+            context.go('/seller/profile');
+          },
         ),
       ),
       body: productsAsync.when(

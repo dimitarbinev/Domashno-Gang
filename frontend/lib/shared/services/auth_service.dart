@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'storage_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
@@ -135,6 +136,13 @@ class AuthService {
   Future<void> switchRole(String newRole) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception('No authenticated user found');
+
+    // Ensure the Firestore user document exists so backend "update" calls don't fail with NOT_FOUND.
+    // (Some users may have been created without a matching `users/{uid}` document.)
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .set({'role': newRole}, SetOptions(merge: true));
 
     final idToken = await user.getIdToken();
     if (idToken == null) throw Exception("Failed to get ID token");

@@ -49,6 +49,43 @@ class AppConstants {
 
   static List<String> get cities => cityLocations.keys.toList()..sort();
 
+  static String normalizeCityName(String input) {
+    if (input.isEmpty) return input;
+    final lower = input.toLowerCase().trim();
+    const mapping = {
+      'shumen': 'Шумен',
+      'pleven': 'Плевен',
+      'vratsa': 'Враца',
+      'sofia': 'София',
+      'plovdiv': 'Пловдив',
+      'varna': 'Варна',
+      'burgas': 'Бургас',
+      'ruse': 'Русе',
+      'stara zagora': 'Стара Загора',
+      'sliven': 'Сливен',
+      'dobrich': 'Добрич',
+      'pernik': 'Перник',
+      'haskovo': 'Хасково',
+      'yambol': 'Ямбол',
+      'pazardzhik': 'Пазарджик',
+      'blagoevgrad': 'Благоевград',
+      'veliko tarnovo': 'Велико Търново',
+      'gabrovo': 'Габрово',
+      'asenovgrad': 'Асеновград',
+      'vidin': 'Видин',
+      'kazanlak': 'Казанлък',
+      'kyustendil': 'Кюстендил',
+      'montana': 'Монтана',
+      'dimitrovgrad': 'Димитровград',
+      'lovech': 'Ловеч',
+    };
+    if (mapping.containsKey(lower)) return mapping[lower]!;
+    for (final city in cityLocations.keys) {
+      if (city.toLowerCase() == lower) return city;
+    }
+    return input;
+  }
+
   // ─── Сезони ───
   static const List<String> seasons = [
     'Пролет',

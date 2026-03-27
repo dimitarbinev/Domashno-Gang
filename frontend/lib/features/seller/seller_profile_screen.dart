@@ -12,6 +12,8 @@ class SellerProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final reviewStatsAsync = ref.watch(sellerReviewStatsProvider);
+
     return NatureScaffold(
       appBar: AppBar(
         title: const Text('Профил на продавач', style: TextStyle(color: Colors.white)),
@@ -35,8 +37,20 @@ class SellerProfileScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 16),
               ref.watch(reactiveSellerProvider).when(
-                data: (seller) => Column(
-                  children: [
+                data: (seller) {
+                  final liveRating = reviewStatsAsync.maybeWhen(
+                    data: (stats) => stats.rating,
+                    orElse: () => 0.0,
+                  );
+                  final liveReviews = reviewStatsAsync.maybeWhen(
+                    data: (stats) => stats.totalReviews,
+                    orElse: () => 0,
+                  );
+                  final displayRating = liveReviews > 0 ? liveRating : (seller?.rating ?? 0.0);
+                  final displayReviews = liveReviews > 0 ? liveReviews : (seller?.totalReviews ?? 0);
+
+                  return Column(
+                    children: [
                     // Header Info
                     Text(
                       seller?.name ?? 'Продавач',
@@ -62,15 +76,15 @@ class SellerProfileScreen extends ConsumerWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        RatingStars(rating: seller?.rating ?? 0.0, size: 20),
+                        RatingStars(rating: displayRating, size: 20),
                         const SizedBox(width: 8),
                         Text(
-                          (seller?.rating ?? 0.0).toStringAsFixed(1),
+                          displayRating.toStringAsFixed(1),
                           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '(${seller?.totalReviews ?? 0} отзива)',
+                          '($displayReviews отзива)',
                           style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
                         ),
                       ],
@@ -105,8 +119,9 @@ class SellerProfileScreen extends ConsumerWidget {
                         ),
                       ],
                     ),
-                  ],
-                ),
+                    ],
+                  );
+                },
                 loading: () => const CircularProgressIndicator(),
                 error: (_, _) => const Text('Грешка при зареждане'),
               ),

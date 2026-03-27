@@ -15,6 +15,7 @@ class SellerDashboardScreen extends ConsumerWidget {
     final user = ref.watch(authStateProvider).value;
     if (user == null) return const NatureScaffold(body: Center(child: CircularProgressIndicator()));
     final userId = user.uid;
+    final reviewStatsAsync = ref.watch(sellerReviewStatsProvider);
 
     return NatureScaffold(
       blur: 8.0,
@@ -122,8 +123,8 @@ class SellerDashboardScreen extends ConsumerWidget {
                           icon: Icons.rate_review_rounded,
                           iconColor: AppTheme.statusThresholdReached,
                           label: 'Общо отзиви',
-                          value: ref.watch(reactiveSellerProvider).maybeWhen(
-                            data: (s) => '${s?.totalReviews ?? 0}',
+                          value: reviewStatsAsync.maybeWhen(
+                            data: (stats) => '${stats.totalReviews}',
                             orElse: () => '0',
                           ),
                         ),
@@ -131,8 +132,8 @@ class SellerDashboardScreen extends ConsumerWidget {
                           icon: Icons.star_rounded,
                           iconColor: AppTheme.accentGreen,
                           label: 'Ср. оценка',
-                          value: ref.watch(reactiveSellerProvider).maybeWhen(
-                            data: (s) => (s?.rating ?? 0.0).toStringAsFixed(1),
+                          value: reviewStatsAsync.maybeWhen(
+                            data: (stats) => stats.rating.toStringAsFixed(1),
                             orElse: () => '0.0',
                           ),
                         ),

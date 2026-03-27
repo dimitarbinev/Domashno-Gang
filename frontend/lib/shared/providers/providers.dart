@@ -8,6 +8,7 @@ import '../models/models.dart';
 import '../services/auth_service.dart';
 import '../services/product_service.dart';
 import '../services/storage_service.dart';
+import '../../core/constants.dart';
 
 // ─── Service Providers ───
 final authServiceProvider = Provider<AuthService>((ref) => AuthService());
@@ -194,7 +195,35 @@ final myReviewsProvider = StreamProvider<List<Review>>((ref) {
       .map((snap) => snap.docs.map((d) => Review.fromJson(d.data(), d.id)).toList());
 });
 
-final myReservationsProvider = backendBuyerReservationsProvider;
+final sellerReviewStatsProvider = Provider<AsyncValue<({double rating, int totalReviews})>>((ref) {
+  final reviewsAsync = ref.watch(myReviewsProvider);
+  return reviewsAsync.whenData((reviews) {
+    if (reviews.isEmpty) {
+      return (rating: 0.0, totalReviews: 0);
+    }
+
+    final total = reviews.length;
+    final avg = reviews.fold<double>(0.0, (acc, r) => acc + r.rating) / total;
+    return (rating: avg, totalReviews: total);
+  });
+});
+
+final myReservationsProvider = StreamProvider<List<Reservation>>((ref) {
+  final user = ref.watch(authStateProvider).value;
+  if (user == null) return Stream.value([]);
+
+  return ref
+      .watch(firestoreProvider)
+      .collection('reservations')
+      .where('buyerId', isEqualTo: user.uid)
+      .snapshots()
+      .map((snap) {
+        final reservations =
+            snap.docs.map((d) => Reservation.fromJson(d.data(), d.id)).toList();
+        reservations.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        return reservations;
+      });
+});
 
 // ─── Seller Reviews ───
 final sellerReviewsProvider = StreamProvider.family<List<Review>, String>((
@@ -230,6 +259,76 @@ final notificationsProvider =
                     .toList(),
           );
     });
+
+// ─── Seller's Route Info (Cities + Reservations) ───
+class SellerRouteInfo {
+  final List<String> uniqueCities;
+  final int totalReservations;
+  final List<Reservation> reservations;
+
+  SellerRouteInfo({
+    required this.uniqueCities,
+    required this.totalReservations,
+    required this.reservations,
+  });
+}
+
+final sellerReservationCitiesProvider = StreamProvider.family<SellerRouteInfo, String>((ref, sellerId) {
+  final firestore = ref.watch(firestoreProvider);
+  final sellerAsync = ref.watch(reactiveSellerProvider);
+  
+  return firestore
+      .collection('reservations')
+      .where('sellerId', isEqualTo: sellerId)
+      .snapshots()
+      .asyncMap((snap) async {
+    final reservations = snap.docs.map((d) {
+      final data = d.data();
+      return Reservation.fromJson(data, d.id);
+    }).toList();
+
+    // Get unique buyer IDs
+    final buyerIds = reservations
+        .map((r) => r.buyerId)
+        .where((id) => id.isNotEmpty)
+        .toSet()
+        .toList();
+
+    // Look up each buyer's city from their user profile
+    final List<String> cities = [];
+    for (final buyerId in buyerIds) {
+      final userDoc = await firestore.collection('users').doc(buyerId).get();
+      if (userDoc.exists) {
+        final data = userDoc.data()!;
+        // Use preferredCity for buyers, mainCity for sellers
+        final rawCity = (data['preferredCity'] as String?) ??
+                        (data['mainCity'] as String?) ??
+                        '';
+        final city = AppConstants.normalizeCityName(rawCity);
+        if (city.isNotEmpty && !cities.contains(city)) {
+          cities.add(city);
+        }
+      }
+    }
+
+    // Add seller's main city as the starting point
+    final seller = sellerAsync.value;
+    if (seller != null && seller.mainCity.isNotEmpty) {
+      if (!cities.contains(seller.mainCity)) {
+        cities.insert(0, seller.mainCity);
+      } else {
+        cities.remove(seller.mainCity);
+        cities.insert(0, seller.mainCity);
+      }
+    }
+    
+    return SellerRouteInfo(
+      uniqueCities: cities,
+      totalReservations: reservations.length,
+      reservations: reservations,
+    );
+  });
+});
 
 final unreadNotificationCountProvider = Provider.family<int, String>((
   ref,

@@ -168,7 +168,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               ),
               const SizedBox(height: 32),
               const Text(
-                AppConstants.appName,
+                'AgriSell',
                 style: TextStyle(
                   fontSize: 36,
                   fontWeight: FontWeight.w900,

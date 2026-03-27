@@ -81,6 +81,7 @@ export const placeOrder = catch_async(async (req: Request, res: Response) => {
     }
 
     const buyerName = userDoc.data()?.name || "Anonymous";
+    const buyerCity = userDoc.data()?.preferredCity || "";
 
     // Refs for atomic transaction
     const listingRef = db.collection("users").doc(sellerId)
@@ -146,9 +147,10 @@ export const placeOrder = catch_async(async (req: Request, res: Response) => {
             const resRef = db.collection("reservations").doc();
             transaction.set(resRef, {
                 listingId, buyerId: uid, buyerName,
-                sellerId, productId, // adding these
+                sellerId, productId,
                 productName: productData.productName || productData.name || '',
-                city: listingData.city || productData.origin || '',
+                // Use BUYER city for delivery routes if available, fallback to listing city
+                city: buyerCity || listingData.city || productData.origin || '',
                 pricePerKg: Number(productData.pricePerKg || 0),
                 quantity: requestedQty,
                 deposit: Number(deposit),
@@ -172,7 +174,7 @@ export const placeOrder = catch_async(async (req: Request, res: Response) => {
                 const buyerPhone = userDoc.data()?.phoneNumber || userDoc.data()?.phone || "No phone provided";
                 const msg = `New Reservation!\nBuyer: ${buyerName}\nPhone: ${buyerPhone}\nProduct: ${txResult.productName}\nQuantity: ${quantity} kg\nDeposit: ${deposit}`;
                 console.log(msg);
-                fetch('https://oligarchically-unpreponderated-linda.ngrok-free.dev/send-telegram-message', {
+                fetch(`${process.env.AI_SERVICE_URL}/send-telegram-message`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ phone_number: sellerPhone, message: msg })
@@ -372,7 +374,7 @@ export const cancelReservation = catch_async(async (req: Request, res: Response)
             }
 
             const resData = resDoc.data()!;
-            if (resData.buyerId !== uid) {
+            if (resData.buyerId !== uid && resData.sellerId !== uid) {
                 throw new Error("Unauthorized to cancel this reservation");
             }
 
@@ -380,7 +382,8 @@ export const cancelReservation = catch_async(async (req: Request, res: Response)
                 throw new Error("Reservation already cancelled");
             }
             if (resData.status === 'confirmed' || resData.status === 'completed') {
-                throw new Error("Cannot cancel a confirmed or completed reservation. Please contact the seller.");
+                const isBuyer = uid === resData.buyerId;
+                throw new Error(isBuyer ? "Cannot cancel a confirmed or completed reservation. Please contact the seller." : "Cannot cancel a confirmed or completed reservation.");
             }
 
             // Read listing info if necessary
@@ -394,7 +397,7 @@ export const cancelReservation = catch_async(async (req: Request, res: Response)
             }
 
             // Read order info (Regular query - MUST BE BEFORE UPDATES)
-            const ordersSnapshot = await db.collection("users").doc(uid).collection("orders")
+            const ordersSnapshot = await db.collection("users").doc(resData.buyerId).collection("orders")
                 .where("listingId", "==", resData.listingId)
                 .where("quantity", "==", resData.quantity)
                 .get();
