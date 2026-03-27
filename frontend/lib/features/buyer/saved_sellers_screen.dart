@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../shared/providers/providers.dart';
+import '../../shared/widgets/nature_scaffold.dart';
 
 class SavedSellersScreen extends ConsumerWidget {
   const SavedSellersScreen({super.key});
@@ -11,31 +12,33 @@ class SavedSellersScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final savedSellersAsync = ref.watch(savedSellersProvider);
 
-    return Scaffold(
+    return NatureScaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
           onPressed: () => context.pop(),
         ),
-        title: const Text('Saved Sellers'),
+        title: const Text('Запазени продавачи'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       body: savedSellersAsync.when(
         data: (ids) {
           if (ids.isEmpty) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.favorite_border, size: 64, color: AppTheme.textTertiary),
-                  SizedBox(height: 16),
-                  Text(
-                    'No saved sellers',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: AppTheme.textSecondary),
+                  Icon(Icons.favorite_border, size: 64, color: Colors.white.withValues(alpha: 0.3)),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Няма запазени продавачи',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
-                    'Sellers you like will appear here.',
-                    style: TextStyle(color: AppTheme.textTertiary),
+                    'Продавачите, които харесвате, ще се появят тук.',
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.6)),
                   ),
                 ],
               ),
@@ -52,7 +55,7 @@ class SavedSellersScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(child: Text('Error: $error')),
+        error: (error, stack) => Center(child: Text('Error: $error', style: const TextStyle(color: Colors.white))),
       ),
     );
   }
@@ -81,12 +84,13 @@ class _SavedSellerCard extends ConsumerWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 gradient: AppTheme.primaryGradient,
+                border: Border.all(color: Colors.white.withValues(alpha: 0.2), width: 1.5),
               ),
               child: const Icon(Icons.person, color: Colors.white),
             ),
             title: Text(
-              profile['name'] ?? 'Seller',
-              style: const TextStyle(fontWeight: FontWeight.w700, color: AppTheme.textPrimary),
+              profile['name'] ?? 'Продавач',
+              style: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,7 +100,8 @@ class _SavedSellerCard extends ConsumerWidget {
                   children: [
                     const Icon(Icons.location_on_outlined, size: 14, color: AppTheme.accentGreen),
                     const SizedBox(width: 4),
-                    Text(profile['mainCity'] ?? 'Unknown', style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                    Text(profile['mainCity'] ?? 'Неизвестен', 
+                      style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.7))),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -106,10 +111,11 @@ class _SavedSellerCard extends ConsumerWidget {
                     const SizedBox(width: 4),
                     Text(
                       (profile['rating'] as num?)?.toStringAsFixed(1) ?? '0.0',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
                     ),
                     const SizedBox(width: 4),
-                    Text('(${profile['reviewCount'] ?? 0})', style: const TextStyle(fontSize: 12, color: AppTheme.textTertiary)),
+                    Text('(${profile['reviewCount'] ?? 0})', 
+                      style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.4))),
                   ],
                 ),
               ],
@@ -123,7 +129,7 @@ class _SavedSellerCard extends ConsumerWidget {
         );
       },
       loading: () => const SizedBox(height: 100, child: Center(child: CircularProgressIndicator())),
-      error: (err, _) => ListTile(title: Text('Error loading seller: $err')),
+      error: (err, _) => ListTile(title: Text('Грешка при зареждане: $err', style: const TextStyle(color: Colors.white))),
     );
   }
 }

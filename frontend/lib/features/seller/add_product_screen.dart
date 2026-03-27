@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../core/theme.dart';
 import '../../core/constants.dart';
 import '../../shared/providers/providers.dart';
+import '../../shared/widgets/nature_scaffold.dart';
 
 class AddProductScreen extends ConsumerStatefulWidget {
   const AddProductScreen({super.key});
@@ -63,7 +64,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         _selectedCategory == null ||
         _selectedSeason == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
+        const SnackBar(content: Text('Моля, попълнете всички полета')),
       );
       return;
     }
@@ -75,7 +76,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
 
     if (price == null || quantity == null || minThreshold == null || maxCapacity == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter valid numeric values')),
+        const SnackBar(content: Text('Моля, въведете валидни числови стойности')),
       );
       return;
     }
@@ -86,8 +87,6 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
       final user = ref.read(authStateProvider).value;
       if (user == null) throw Exception('No authenticated user');
 
-      // Image upload disabled as requested. 
-      // Using a placeholder URL to satisfy backend requirement.
       const String imageUrl = 'https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?q=80&w=500&auto=format&fit=crop';
 
       await ref.read(productServiceProvider).addProduct(
@@ -104,14 +103,14 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Product listed successfully')),
+          const SnackBar(content: Text('Продуктът е добавен успешно')),
         );
         context.go('/seller/dashboard');
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to add product: ${e.toString()}')),
+          SnackBar(content: Text('Неуспешно добавяне: ${e.toString()}')),
         );
       }
     } finally {
@@ -123,13 +122,15 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return NatureScaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
+          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
           onPressed: () => context.go('/seller/dashboard'),
         ),
-        title: const Text('Add Product'),
+        title: const Text('Добави продукт'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -146,9 +147,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                   height: 160,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-                    color: AppTheme.cardSurfaceLight,
+                    color: Colors.white.withValues(alpha: 0.05),
                     border: Border.all(
-                      color: AppTheme.primaryGreen.withValues(alpha: 0.3),
+                      color: Colors.white.withValues(alpha: 0.1),
                       width: 1.5,
                     ),
                     image: _imageFile != null
@@ -159,15 +160,15 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                         : null,
                   ),
                   child: _imageFile == null
-                      ? const Column(
+                      ? Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.add_photo_alternate_outlined,
+                            const Icon(Icons.add_photo_alternate_outlined,
                                 size: 40, color: AppTheme.accentGreen),
-                            SizedBox(height: 8),
-                            Text('Add Product Photo',
+                            const SizedBox(height: 8),
+                            Text('Добави снимка',
                                 style: TextStyle(
-                                    color: AppTheme.textSecondary,
+                                    color: Colors.white.withValues(alpha: 0.6),
                                     fontSize: 14)),
                           ],
                         )
@@ -176,96 +177,139 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
               ),
               const SizedBox(height: 20),
 
+              _buildFieldLabel('Име на продукт'),
               TextField(
                 controller: _nameController,
-                style: const TextStyle(color: AppTheme.textPrimary),
-                decoration: const InputDecoration(labelText: 'Product Name'),
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDecoration('Напр. Розови домати'),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 18),
+
+              _buildFieldLabel('Категория'),
               DropdownButtonFormField<String>(
                 initialValue: _selectedCategory,
-                decoration: const InputDecoration(labelText: 'Category'),
-                dropdownColor: AppTheme.cardSurface,
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDecoration('Избери категория'),
+                dropdownColor: Colors.black87,
                 items: AppConstants.productCategories
-                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                    .map((c) => DropdownMenuItem(value: c, child: Text(c, style: const TextStyle(color: Colors.white))))
                     .toList(),
                 onChanged: (v) => setState(() => _selectedCategory = v),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 18),
+
+              _buildFieldLabel('Произход'),
               TextField(
                 controller: _originController,
-                style: const TextStyle(color: AppTheme.textPrimary),
-                decoration: const InputDecoration(labelText: 'Origin (e.g. Kazanlak Valley)'),
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDecoration('Напр. Розова долина'),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 18),
+
+              _buildFieldLabel('Цена за кг (лв)'),
               TextField(
                 controller: _priceController,
                 keyboardType: TextInputType.number,
-                style: const TextStyle(color: AppTheme.textPrimary),
-                decoration: const InputDecoration(
-                  labelText: 'Price per kg (лв)',
-                  prefixText: '  лв ',
+                style: const TextStyle(color: Colors.white),
+                decoration: _inputDecoration('0.00').copyWith(
+                  prefixIcon: const Icon(Icons.payments_outlined, color: AppTheme.accentGreen, size: 20),
                 ),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 18),
+
               Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: _quantityController,
-                      keyboardType: TextInputType.number,
-                      style: const TextStyle(color: AppTheme.textPrimary),
-                      decoration: const InputDecoration(labelText: 'Available Qty (kg)'),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildFieldLabel('Налично (кг)'),
+                        TextField(
+                          controller: _quantityController,
+                          keyboardType: TextInputType.number,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _inputDecoration('0'),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: TextField(
-                      controller: _minThresholdController,
-                      keyboardType: TextInputType.number,
-                      style: const TextStyle(color: AppTheme.textPrimary),
-                      decoration: const InputDecoration(labelText: 'Min Threshold (kg)'),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildFieldLabel('Мин. праг (кг)'),
+                        TextField(
+                          controller: _minThresholdController,
+                          keyboardType: TextInputType.number,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _inputDecoration('0'),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 18),
+
               Row(
                 children: [
                   Expanded(
-                    child: TextField(
-                      controller: _maxCapacityController,
-                      keyboardType: TextInputType.number,
-                      style: const TextStyle(color: AppTheme.textPrimary),
-                      decoration: const InputDecoration(labelText: 'Max Capacity (kg)'),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildFieldLabel('Макс. капацитет'),
+                        TextField(
+                          controller: _maxCapacityController,
+                          keyboardType: TextInputType.number,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _inputDecoration('0'),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: DropdownButtonFormField<String>(
-                      initialValue: _selectedSeason,
-                      decoration: const InputDecoration(labelText: 'Season'),
-                      dropdownColor: AppTheme.cardSurface,
-                      items: AppConstants.seasons
-                          .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                          .toList(),
-                      onChanged: (v) => setState(() => _selectedSeason = v),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildFieldLabel('Сезон'),
+                        DropdownButtonFormField<String>(
+                          initialValue: _selectedSeason,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: _inputDecoration('Избери'),
+                          dropdownColor: Colors.black87,
+                          items: AppConstants.seasons
+                              .map((s) => DropdownMenuItem(value: s, child: Text(s, style: const TextStyle(color: Colors.white))))
+                              .toList(),
+                          onChanged: (v) => setState(() => _selectedSeason = v),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 32),
+
               Container(
                 height: 52,
                 decoration: BoxDecoration(
                   gradient: AppTheme.primaryGradient,
                   borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primaryGreen.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _handleSave,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
                     shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppTheme.radiusMedium)),
                   ),
                   child: _isLoading
                       ? const SizedBox(
@@ -276,12 +320,49 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                             color: Colors.white,
                           ),
                         )
-                      : const Text('Save Product'),
+                      : const Text('Запази продукт',
+                          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFieldLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: Colors.white.withValues(alpha: 0.8),
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3), fontSize: 14),
+      filled: true,
+      fillColor: Colors.white.withValues(alpha: 0.05),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppTheme.accentGreen, width: 1),
       ),
     );
   }

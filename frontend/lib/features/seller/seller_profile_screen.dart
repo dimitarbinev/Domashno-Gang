@@ -4,15 +4,19 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../shared/widgets/rating_stars.dart';
 import '../../shared/providers/providers.dart';
+import '../../shared/widgets/nature_scaffold.dart';
+
 
 class SellerProfileScreen extends ConsumerWidget {
   const SellerProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
+    return NatureScaffold(
       appBar: AppBar(
-        title: const Text('Seller Profile'),
+        title: const Text('Профил на продавач', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -35,7 +39,7 @@ class SellerProfileScreen extends ConsumerWidget {
                   children: [
                     // Header Info
                     Text(
-                      seller?.name ?? 'Seller',
+                      seller?.name ?? 'Продавач',
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
@@ -49,7 +53,7 @@ class SellerProfileScreen extends ConsumerWidget {
                         const Icon(Icons.location_on_outlined, size: 14, color: AppTheme.accentGreen),
                         const SizedBox(width: 4),
                         Text(
-                          seller?.mainCity ?? 'Unknown',
+                          seller?.mainCity ?? 'Неизвестен',
                           style: const TextStyle(fontSize: 14, color: AppTheme.textSecondary),
                         ),
                       ],
@@ -66,7 +70,7 @@ class SellerProfileScreen extends ConsumerWidget {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          '(${seller?.totalReviews ?? 0} reviews)',
+                          '(${seller?.totalReviews ?? 0} отзива)',
                           style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
                         ),
                       ],
@@ -78,7 +82,7 @@ class SellerProfileScreen extends ConsumerWidget {
                       children: [
                         Expanded(
                           child: _StatCard(
-                            label: 'Completed',
+                            label: 'Завършени',
                             value: '${seller?.completedOrders ?? 0}',
                             icon: Icons.check_circle_outline,
                           ),
@@ -86,7 +90,7 @@ class SellerProfileScreen extends ConsumerWidget {
                         const SizedBox(width: 12),
                         Expanded(
                           child: _StatCard(
-                            label: 'Cancel Rate',
+                            label: '% отказ',
                             value: '${((seller?.cancelRate ?? 0.0) * 100).toStringAsFixed(0)}%',
                             icon: Icons.cancel_outlined,
                           ),
@@ -94,7 +98,7 @@ class SellerProfileScreen extends ConsumerWidget {
                         const SizedBox(width: 12),
                         const Expanded(
                           child: _StatCard(
-                            label: 'Products',
+                            label: 'Продукти',
                             value: '8',
                             icon: Icons.eco,
                           ),
@@ -104,16 +108,16 @@ class SellerProfileScreen extends ConsumerWidget {
                   ],
                 ),
                 loading: () => const CircularProgressIndicator(),
-                error: (_, __) => const Text('Error loading profile'),
+                error: (_, _) => const Text('Грешка при зареждане'),
               ),
               const SizedBox(height: 28),
 
               // Menu items
-              _MenuItem(icon: Icons.inventory_2_outlined, label: 'My Products', onTap: () => context.go('/seller/products')),
-              _MenuItem(icon: Icons.settings_outlined, label: 'Settings', onTap: () => context.push('/seller/settings')),
+              _MenuItem(icon: Icons.inventory_2_outlined, label: 'Моите продукти', onTap: () => context.go('/seller/products')),
+              _MenuItem(icon: Icons.settings_outlined, label: 'Настройки', onTap: () => context.push('/seller/settings')),
               _MenuItem(
                 icon: Icons.shopping_bag_outlined,
-                label: 'Switch to Buyer',
+                label: 'Превключи към купувач',
                 onTap: () async {
                   try {
                     await ref.read(authServiceProvider).switchRole('buyer');
@@ -123,7 +127,7 @@ class SellerProfileScreen extends ConsumerWidget {
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Failed to switch role: $e')),
+                        SnackBar(content: Text('Неуспешна смяна на ролята: $e')),
                       );
                     }
                   }
@@ -131,7 +135,7 @@ class SellerProfileScreen extends ConsumerWidget {
               ),
               _MenuItem(
                 icon: Icons.logout,
-                label: 'Sign Out',
+                label: 'Изход',
                 isDestructive: true,
                 onTap: () async {
                   await ref.read(authServiceProvider).signOut();

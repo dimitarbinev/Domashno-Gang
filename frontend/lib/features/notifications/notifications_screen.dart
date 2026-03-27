@@ -4,13 +4,15 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../shared/models/models.dart';
 import '../../shared/providers/providers.dart';
+import '../../shared/widgets/nature_scaffold.dart';
+
 
 class NotificationsScreen extends ConsumerWidget {
   const NotificationsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Scaffold(
+    return NatureScaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
@@ -23,11 +25,11 @@ class NotificationsScreen extends ConsumerWidget {
             }
           },
         ),
-        title: const Text('Notifications'),
+        title: const Text('Известия', style: TextStyle(color: Colors.white)),
         actions: [
           TextButton(
             onPressed: () {/* TODO: mark all read */},
-            child: const Text('Mark all read'),
+            child: const Text('Маркирай всички', style: TextStyle(color: AppTheme.accentGreen)),
           ),
         ],
       ),
@@ -104,9 +106,9 @@ class NotificationsScreen extends ConsumerWidget {
 
   String _timeAgo(DateTime dt) {
     final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-    if (diff.inHours < 24) return '${diff.inHours}h ago';
-    return '${diff.inDays}d ago';
+    if (diff.inMinutes < 60) return 'Преди ${diff.inMinutes} мин.';
+    if (diff.inHours < 24) return 'Преди ${diff.inHours} ч.';
+    return 'Преди ${diff.inDays} дни';
   }
 }
 

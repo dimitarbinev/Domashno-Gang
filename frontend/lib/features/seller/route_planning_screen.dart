@@ -5,11 +5,13 @@ import '../../shared/providers/map_provider.dart';
 import '../../shared/providers/providers.dart';
 import '../../core/theme.dart';
 import '../../core/constants.dart';
+import '../../shared/widgets/nature_scaffold.dart';
+
 
 class RoutePlanningScreen extends ConsumerWidget {
   const RoutePlanningScreen({super.key});
 
-  static const LatLng _initialCenter = LatLng(42.6977, 23.3219); // Sofia
+  static const LatLng _initialCenter = LatLng(42.6977, 23.3219);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -19,7 +21,12 @@ class RoutePlanningScreen extends ConsumerWidget {
     final listingsAsync = ref.watch(sellerListingsProvider(user.uid));
     final mapState = ref.watch(mapProvider);
 
-    return Scaffold(
+    return NatureScaffold(
+      appBar: AppBar(
+        title: const Text('Планиране на маршрут', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,7 +45,8 @@ class RoutePlanningScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            // Map
+
+            // ── Map ──
             Expanded(
               flex: 3,
               child: Container(
@@ -46,13 +54,12 @@ class RoutePlanningScreen extends ConsumerWidget {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
                   color: AppTheme.cardSurface,
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+                  border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.06)),
                 ),
                 clipBehavior: Clip.antiAlias,
                 child: listingsAsync.when(
                   data: (listings) {
-                    final activeListings = listings.where((l) => l.status == AppConstants.statusActive).toList();
-                    
                     return GoogleMap(
                       initialCameraPosition: CameraPosition(
                         target: _initialCenter,
@@ -65,7 +72,17 @@ class RoutePlanningScreen extends ConsumerWidget {
                       mapType: MapType.normal,
                       onMapCreated: (controller) {
                         if (mapState.routeOptions.isEmpty) {
-                          ref.read(mapProvider.notifier).fetchHardcodedRoute();
+                          // Demo: 6 cities across Bulgaria
+                          ref
+                              .read(mapProvider.notifier)
+                              .fetchMultiDayRoute([
+                            'Pernik',
+                            'Sofia',
+                            'Vratsa',
+                            'Shumen',
+                            'Varna',
+                            'Burgas',
+                          ]);
                         }
                       },
                     );
@@ -76,7 +93,40 @@ class RoutePlanningScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            // Ranked stops
+
+            // ── Day legend ──
+            if (mapState.routeOptions.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    for (final opt in mapState.routeOptions) ...[
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(
+                              (opt as Map)['color'] as int? ?? 0xFF2ECC71),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Ден ${opt['day']}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                    ],
+                  ],
+                ),
+              ),
+            const SizedBox(height: 8),
+
+            // ── Per-day route cards ──
             Expanded(
               flex: 2,
               child: ListView(
@@ -127,25 +177,25 @@ class RoutePlanningScreen extends ConsumerWidget {
   }
 }
 
-class _StopCard extends StatelessWidget {
-  final int rank;
-  final String city;
-  final bool isLast;
-  final double totalProfit;
-  final double totalDistance;
-  final String time;
+/// Card showing analysis for one day's route
+class _DayRouteCard extends StatelessWidget {
+  final Map<String, dynamic> routeInfo;
 
-  const _StopCard({
-    required this.rank,
-    required this.city,
-    required this.isLast,
-    required this.totalProfit,
-    required this.totalDistance,
-    required this.time,
-  });
+  const _DayRouteCard({required this.routeInfo});
 
   @override
   Widget build(BuildContext context) {
+    final label = routeInfo['label'] as String? ?? 'Route';
+    final stops = routeInfo['ordered_stops'] as List? ?? [];
+    final distKm = routeInfo['total_distance_km'] ?? 0;
+    final driveTime = routeInfo['drive_time_readable'] ?? '';
+    final adminMin = routeInfo['admin_time_minutes'] ?? 0;
+    final totalTime = routeInfo['total_time_readable'] ?? '';
+    final numStops = routeInfo['num_stops'] ?? stops.length;
+    final colorValue = routeInfo['color'] as int?;
+    final color =
+        colorValue != null ? Color(colorValue) : AppTheme.primaryGreen;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
@@ -183,5 +233,3 @@ class _StopCard extends StatelessWidget {
     );
   }
 }
-
-// Sample data removed as we now use real Firestore data

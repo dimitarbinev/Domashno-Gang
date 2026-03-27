@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../core/theme.dart';
 import '../../core/constants.dart';
 import '../../shared/providers/providers.dart';
+import '../../shared/widgets/nature_scaffold.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -114,73 +115,85 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF0F1214), Color(0xFF1A2E1A)],
-          ),
-        ),
-        child: Center(
-          child: AnimatedBuilder(
-            animation: _controller,
-            builder: (context, child) {
-              return Opacity(
-                opacity: _fadeIn.value,
-                child: Transform.scale(
-                  scale: _scaleUp.value,
-                  child: child,
-                ),
-              );
-            },
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Glow behind logo
-                Container(
-                  width: 120,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: RadialGradient(
-                      colors: [
-                        AppTheme.primaryGreen.withValues(alpha: 0.3),
-                        Colors.transparent,
-                      ],
-                      radius: 1.2,
-                    ),
+    return NatureScaffold(
+      blur: 0.0,
+      overlayOpacity: 0.25,
+      safeArea: false,
+      body: Center(
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            return Opacity(
+              opacity: _fadeIn.value,
+              child: Transform.scale(
+                scale: _scaleUp.value,
+                child: child,
+              ),
+            );
+          },
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Glow behind logo
+              Container(
+                width: 140,
+                height: 140,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      AppTheme.primaryGreen.withValues(alpha: 0.4),
+                      AppTheme.primaryGreen.withValues(alpha: 0.1),
+                      Colors.transparent,
+                    ],
+                    radius: 0.8,
                   ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.storefront_rounded,
-                      size: 64,
+                ),
+                child: Center(
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: AppTheme.cardSurface.withValues(alpha: 0.5),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                    ),
+                    child: const Icon(
+                      Icons.eco_rounded,
+                      size: 56,
                       color: AppTheme.accentGreen,
                     ),
                   ),
                 ),
-                const SizedBox(height: 24),
-                const Text(
-                  AppConstants.appName,
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    color: AppTheme.textPrimary,
-                    letterSpacing: -0.5,
-                  ),
+              ),
+              const SizedBox(height: 32),
+              const Text(
+                AppConstants.appName,
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.w900,
+                  color: AppTheme.textPrimary,
+                  letterSpacing: -1.0,
                 ),
-                const SizedBox(height: 8),
-                const Text(
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppTheme.accentGreen.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppTheme.radiusRound),
+                ),
+                child: const Text(
                   AppConstants.tagline,
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                     color: AppTheme.accentGreen,
+                    letterSpacing: 0.5,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -188,19 +201,25 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 }
 
-class AnimatedBuilder extends AnimatedWidget {
+/// A simplified AnimatedBuilder since the built-in one requires a Listenable.
+class AnimatedBuilder extends StatelessWidget {
   final Widget? child;
   final TransitionBuilder builder;
+  final Listenable animation;
 
   const AnimatedBuilder({
     super.key,
-    required Animation<double> animation,
+    required this.animation,
     required this.builder,
     this.child,
-  }) : super(listenable: animation);
+  });
 
   @override
   Widget build(BuildContext context) {
-    return builder(context, child);
+    return ListenableBuilder(
+      listenable: animation,
+      builder: builder,
+      child: child,
+    );
   }
 }

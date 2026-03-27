@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../core/constants.dart';
 import '../../shared/providers/providers.dart';
+import '../../shared/widgets/nature_scaffold.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -46,14 +47,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty || 
         name.isEmpty || city == null || phone.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields')),
+        const SnackBar(content: Text('Моля, попълнете всички полета')),
       );
       return;
     }
 
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match')),
+        const SnackBar(content: Text('Паролите не съвпадат')),
       );
       return;
     }
@@ -83,7 +84,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registration failed: ${e.toString()}')),
+          SnackBar(content: Text('Неуспешна регистрация: ${e.toString()}')),
         );
       }
     } finally {
@@ -95,8 +96,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return NatureScaffold(
+      blur: 0.0,
+      overlayOpacity: 0.25,
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => context.go('/login'),
@@ -110,7 +115,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             children: [
               const SizedBox(height: 20),
               const Text(
-                'Create Account',
+                'Създаване на акаунт',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
@@ -119,14 +124,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               ),
               const SizedBox(height: 8),
               const Text(
-                'Join the agricultural marketplace',
+                'Присъединете се към земеделския пазар',
                 style: TextStyle(fontSize: 15, color: AppTheme.textSecondary),
               ),
               const SizedBox(height: 32),
 
               // Role Selection
               const Text(
-                'I want to',
+                'Искам да',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
@@ -139,8 +144,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   Expanded(
                     child: _RoleCard(
                       icon: Icons.storefront_rounded,
-                      label: 'Sell Products',
-                      subtitle: 'I\'m a farmer/seller',
+                      label: 'Продавам',
+                      subtitle: 'Аз съм фермер/продавач',
                       isSelected: _selectedRole == 'seller',
                       onTap: () => setState(() => _selectedRole = 'seller'),
                     ),
@@ -149,8 +154,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   Expanded(
                     child: _RoleCard(
                       icon: Icons.shopping_bag_rounded,
-                      label: 'Buy Products',
-                      subtitle: 'I\'m a buyer',
+                      label: 'Купувам',
+                      subtitle: 'Аз съм купувач',
                       isSelected: _selectedRole == 'buyer',
                       onTap: () => setState(() => _selectedRole = 'buyer'),
                     ),
@@ -170,7 +175,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       controller: _nameController,
                       style: const TextStyle(color: AppTheme.textPrimary),
                       decoration: const InputDecoration(
-                        labelText: 'Full Name',
+                        labelText: 'Пълно име',
                         prefixIcon: Icon(Icons.person_outline, size: 20),
                       ),
                     ),
@@ -180,7 +185,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       keyboardType: TextInputType.emailAddress,
                       style: const TextStyle(color: AppTheme.textPrimary),
                       decoration: const InputDecoration(
-                        labelText: 'Email',
+                        labelText: 'Имейл',
                         prefixIcon: Icon(Icons.email_outlined, size: 20),
                       ),
                     ),
@@ -190,7 +195,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       obscureText: _obscurePassword,
                       style: const TextStyle(color: AppTheme.textPrimary),
                       decoration: InputDecoration(
-                        labelText: 'Password',
+                        labelText: 'Парола',
                         prefixIcon: const Icon(Icons.lock_outline, size: 20),
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -210,15 +215,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       obscureText: true,
                       style: const TextStyle(color: AppTheme.textPrimary),
                       decoration: const InputDecoration(
-                        labelText: 'Confirm Password',
+                        labelText: 'Потвърди парола',
                         prefixIcon: Icon(Icons.lock_outline, size: 20),
                       ),
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: _selectedCity,
+                      initialValue: _selectedCity,
                       decoration: InputDecoration(
-                        labelText: _selectedRole == 'seller' ? 'Main City' : 'Preferred City',
+                        labelText: _selectedRole == 'seller' ? 'Основен град' : 'Предпочитан град',
                         prefixIcon: const Icon(Icons.location_on_outlined, size: 20),
                       ),
                       dropdownColor: AppTheme.cardSurface,
@@ -233,7 +238,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       keyboardType: TextInputType.phone,
                       style: const TextStyle(color: AppTheme.textPrimary),
                       decoration: const InputDecoration(
-                        labelText: 'Phone Number',
+                        labelText: 'Телефонен номер',
                         prefixIcon: Icon(Icons.phone_outlined, size: 20),
                       ),
                     ),
@@ -269,7 +274,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text('Sign Up'),
+                            : const Text('Регистрация'),
                       ),
                     ),
                   ],
@@ -280,12 +285,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'Already have an account? ',
+                    'Вече имате акаунт? ',
                     style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
                   ),
                   TextButton(
                     onPressed: () => context.go('/login'),
-                    child: const Text('Sign In'),
+                    child: const Text('Вход'),
                   ),
                 ],
               ),
@@ -318,38 +323,62 @@ class _RoleCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
-          color: isSelected
-              ? AppTheme.primaryGreen.withValues(alpha: 0.15)
-              : AppTheme.cardSurface,
+        duration: const Duration(milliseconds: 250),
+        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+        decoration: glassDecoration(
+          alpha: isSelected ? 0.25 : 0.08,
+          radius: AppTheme.radiusLarge,
+        ).copyWith(
           border: Border.all(
-            color: isSelected ? AppTheme.primaryGreen : Colors.white.withValues(alpha: 0.06),
-            width: isSelected ? 2 : 1,
+            color: isSelected 
+              ? AppTheme.accentGreen.withValues(alpha: 0.8) 
+              : Colors.white.withValues(alpha: 0.1),
+            width: isSelected ? 2.5 : 1,
           ),
+          boxShadow: isSelected ? [
+            BoxShadow(
+              color: AppTheme.accentGreen.withValues(alpha: 0.25),
+              blurRadius: 15,
+              spreadRadius: 2,
+            )
+          ] : null,
         ),
         child: Column(
           children: [
-            Icon(
-              icon,
-              size: 36,
-              color: isSelected ? AppTheme.accentGreen : AppTheme.textTertiary,
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isSelected 
+                  ? AppTheme.accentGreen.withValues(alpha: 0.2) 
+                  : Colors.white.withValues(alpha: 0.05),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                size: 32,
+                color: isSelected ? AppTheme.accentGreen : AppTheme.textTertiary,
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Text(
               label,
               style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
                 color: isSelected ? AppTheme.textPrimary : AppTheme.textSecondary,
+                letterSpacing: 0.2,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Text(
               subtitle,
-              style: const TextStyle(fontSize: 11, color: AppTheme.textTertiary),
+              style: TextStyle(
+                fontSize: 11, 
+                color: isSelected 
+                  ? AppTheme.textSecondary 
+                  : AppTheme.textTertiary,
+                fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+              ),
               textAlign: TextAlign.center,
             ),
           ],

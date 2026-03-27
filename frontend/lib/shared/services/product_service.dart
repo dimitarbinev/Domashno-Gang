@@ -213,7 +213,6 @@ class ProductService {
       'deposit': deposit,
     };
 
-    print('[ProductService] Placing order with payload: ${jsonEncode(payload)}');
 
     final response = await http.post(
       url,
@@ -310,5 +309,88 @@ class ProductService {
 
     final List<dynamic> data = jsonDecode(response.body);
     return data.map((item) => Reservation.fromJson(item, item['id'] ?? '')).toList();
+  }
+
+  Future<void> submitReview({
+    required String sellerId,
+    required double rating,
+    required String comment,
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No authenticated user found');
+
+    final idToken = await user.getIdToken();
+    if (idToken == null) throw Exception('Failed to retrieve authentication token');
+
+    final cleanBaseUrl = _baseUrl.endsWith('/') ? _baseUrl.substring(0, _baseUrl.length - 1) : _baseUrl;
+    final url = Uri.parse('$cleanBaseUrl/buyer/review');
+
+    final payload = {
+      'sellerId': sellerId,
+      'rating': rating,
+      'comment': comment,
+    };
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $idToken',
+      },
+      body: jsonEncode(payload),
+    );
+
+    if (response.statusCode != 200) {
+      final result = jsonDecode(response.body);
+      throw Exception(result['message'] ?? 'Failed to submit review');
+    }
+  }
+
+  Future<void> cancelReservation(String reservationId) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No authenticated user found');
+
+    final idToken = await user.getIdToken();
+    if (idToken == null) throw Exception('Failed to retrieve authentication token');
+
+    final cleanBaseUrl = _baseUrl.endsWith('/') ? _baseUrl.substring(0, _baseUrl.length - 1) : _baseUrl;
+    final url = Uri.parse('$cleanBaseUrl/buyer/cancel_reservation/$reservationId');
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $idToken',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      final result = jsonDecode(response.body);
+      throw Exception(result['message'] ?? 'Failed to cancel reservation');
+    }
+  }
+
+  Future<List<Review>> getMyReviews() async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception('No authenticated user found');
+
+    final idToken = await user.getIdToken();
+    if (idToken == null) throw Exception('Failed to retrieve authentication token');
+
+    final cleanBaseUrl = _baseUrl.endsWith('/') ? _baseUrl.substring(0, _baseUrl.length - 1) : _baseUrl;
+    final url = Uri.parse('$cleanBaseUrl/buyer/my_reviews');
+
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $idToken',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load my reviews: ${response.body}');
+    }
+
+    final List<dynamic> data = jsonDecode(response.body);
+    return data.map((item) => Review.fromJson(item, item['id'] ?? '')).toList();
   }
 }

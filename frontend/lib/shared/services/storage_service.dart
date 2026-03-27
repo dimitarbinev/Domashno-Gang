@@ -1,7 +1,7 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
-import 'package:path/path.dart' as p;
+
 
 class StorageService {
   final FirebaseStorage? _storage;
@@ -28,8 +28,9 @@ class StorageService {
     if (_storage == null) throw Exception('Firebase Storage not initialized');
 
     try {
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}${p.extension(imageFile.path)}';
-      final ref = _storage!.ref().child('sellers/$sellerId/products/$fileName');
+      final extension = imageFile.path.contains('.') ? imageFile.path.substring(imageFile.path.lastIndexOf('.')) : '';
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}$extension';
+      final ref = _storage.ref().child('sellers/$sellerId/products/$fileName');
       
       // Use putFile and wait for completion
       final uploadTask = ref.putFile(imageFile);

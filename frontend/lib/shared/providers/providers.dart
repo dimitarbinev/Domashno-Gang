@@ -179,9 +179,22 @@ final buyerReservationsProvider =
     });
 
 // ─── Buyer's Reservations (Backend) ───
-final backendBuyerReservationsProvider = FutureProvider<List<Reservation>>((ref) {
-  return ref.watch(productServiceProvider).getMyReservations();
+final backendBuyerReservationsProvider = FutureProvider<List<Reservation>>((ref) async {
+  return ref.read(productServiceProvider).getMyReservations();
 });
+
+final myReviewsProvider = StreamProvider<List<Review>>((ref) {
+  final user = ref.watch(authStateProvider).value;
+  if (user == null) return Stream.value([]);
+  
+  return ref.watch(firestoreProvider)
+      .collection('reviews')
+      .where('sellerId', isEqualTo: user.uid)
+      .snapshots()
+      .map((snap) => snap.docs.map((d) => Review.fromJson(d.data(), d.id)).toList());
+});
+
+final myReservationsProvider = backendBuyerReservationsProvider;
 
 // ─── Seller Reviews ───
 final sellerReviewsProvider = StreamProvider.family<List<Review>, String>((

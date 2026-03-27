@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../../core/theme.dart';
 import '../../shared/widgets/seller_card.dart';
+import '../../shared/widgets/nature_scaffold.dart';
 
 class BuyerMapScreen extends StatefulWidget {
   const BuyerMapScreen({super.key});
@@ -16,7 +17,8 @@ class _BuyerMapScreenState extends State<BuyerMapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return NatureScaffold(
+      safeArea: false,
       body: Stack(
         children: [
           GoogleMap(
@@ -43,15 +45,17 @@ class _BuyerMapScreenState extends State<BuyerMapScreen> {
           // Top search bar
           Positioned(
             top: MediaQuery.of(context).padding.top + 12,
-            left: 20, right: 20,
+            left: 20,
+            right: 20,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               decoration: glassDecoration(),
-              child: const TextField(
-                style: TextStyle(color: AppTheme.textPrimary),
+              child: TextField(
+                style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  hintText: 'Search sellers nearby...',
-                  prefixIcon: Icon(Icons.search, size: 22),
+                  hintText: 'Търси продавачи наблизо...',
+                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+                  prefixIcon: const Icon(Icons.search, size: 22, color: Colors.white70),
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
@@ -64,23 +68,36 @@ class _BuyerMapScreenState extends State<BuyerMapScreen> {
           Positioned(
             top: MediaQuery.of(context).padding.top + 72,
             left: 20,
-            child: Row(
-              children: ['All', 'Vegetables', 'Fruits', 'Dairy']
-                  .map((c) => Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: c == 'All'
-                          ? AppTheme.primaryGreen
-                          : AppTheme.cardSurface.withValues(alpha: 0.9),
-                      borderRadius: BorderRadius.circular(AppTheme.radiusXLarge),
-                    ),
-                    child: Text(c, style: TextStyle(
-                      fontSize: 12, fontWeight: FontWeight.w600,
-                      color: c == 'All' ? Colors.white : AppTheme.textSecondary,
-                    )),
-                  ))
-                  .toList(),
+            right: 0,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: ['Всички', 'Зеленчуци', 'Плодове', 'Млечни']
+                    .map(
+                      (c) => Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: c == 'Всички' ? AppTheme.accentGreen : Colors.black.withValues(alpha: 0.4),
+                          borderRadius: BorderRadius.circular(AppTheme.radiusXLarge),
+                          border: Border.all(
+                            color: c == 'Всички'
+                                ? Colors.white.withValues(alpha: 0.2)
+                                : Colors.white.withValues(alpha: 0.1),
+                          ),
+                        ),
+                        child: Text(
+                          c,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
           ),
         ],
@@ -92,11 +109,13 @@ class _BuyerMapScreenState extends State<BuyerMapScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (ctx) => Container(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: AppTheme.cardSurface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          color: const Color(0xFF1A2B1A).withValues(alpha: 0.95), // Dark green-tinted background
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -104,11 +123,11 @@ class _BuyerMapScreenState extends State<BuyerMapScreen> {
             Container(
               width: 40, height: 4,
               decoration: BoxDecoration(
-                color: AppTheme.textTertiary,
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             SellerCard(
               name: marker.sellerName,
               rating: marker.rating,
@@ -119,18 +138,27 @@ class _BuyerMapScreenState extends State<BuyerMapScreen> {
                 context.go('/buyer/seller/${marker.sellerId}');
               },
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
+              height: 52,
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.accentGreen,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                  ),
+                  elevation: 0,
+                ),
                 onPressed: () {
                   Navigator.pop(ctx);
                   context.go('/buyer/seller/${marker.sellerId}');
                 },
-                child: const Text('View Listings'),
+                child: const Text('Виж всички обяви', style: TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
-            SizedBox(height: MediaQuery.of(ctx).padding.bottom),
+            SizedBox(height: MediaQuery.of(ctx).padding.bottom + 10),
           ],
         ),
       ),

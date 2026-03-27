@@ -18,11 +18,19 @@ class BuyerShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final index = _getIndex(context);
     return Scaffold(
+      extendBody: true,
       body: child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppTheme.cardSurface,
-          border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.06))),
+          color: AppTheme.cardSurface.withValues(alpha: 0.85),
+          border: Border(top: BorderSide(color: AppTheme.accentGreen.withValues(alpha: 0.15))),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
         ),
         child: BottomNavigationBar(
           currentIndex: index,
@@ -35,10 +43,10 @@ class BuyerShell extends StatelessWidget {
             }
           },
           items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.map_rounded), label: 'Map'),
-            BottomNavigationBarItem(icon: Icon(Icons.receipt_long_rounded), label: 'Reservations'),
-            BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Profile'),
+            BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'Начало'),
+            BottomNavigationBarItem(icon: Icon(Icons.map_rounded), label: 'Карта'),
+            BottomNavigationBarItem(icon: Icon(Icons.receipt_long_rounded), label: 'Резервации'),
+            BottomNavigationBarItem(icon: Icon(Icons.person_rounded), label: 'Профил'),
           ],
         ),
       ),

@@ -18,13 +18,21 @@ class SellerShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final index = _getIndex(context);
     return Scaffold(
+      extendBody: true,
       body: child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppTheme.cardSurface,
+          color: AppTheme.cardSurface.withValues(alpha: 0.85),
           border: Border(
-            top: BorderSide(color: Colors.white.withValues(alpha: 0.06)),
+            top: BorderSide(color: AppTheme.accentGreen.withValues(alpha: 0.15)),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
         ),
         child: BottomNavigationBar(
           currentIndex: index,
@@ -43,19 +51,19 @@ class SellerShell extends StatelessWidget {
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.dashboard_rounded),
-              label: 'Dashboard',
+              label: 'Табло',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.list_alt_rounded),
-              label: 'Listings',
+              label: 'Обяви',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.map_rounded),
-              label: 'Route',
+              label: 'Маршрут',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_rounded),
-              label: 'Profile',
+              label: 'Профил',
             ),
           ],
         ),

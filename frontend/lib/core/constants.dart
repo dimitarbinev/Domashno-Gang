@@ -1,92 +1,64 @@
 class AppConstants {
   AppConstants._();
 
-  static const String appName = 'Agro Street Market';
-  static const String tagline = 'Fresh from farm to street';
+  static const String appName = 'АгроСтрийт Маркет';
+  static const String tagline = 'Пресни продукти от фермата до улицата';
 
-  // ─── Product Categories ───
+  // ─── Категории продукти ───
   static const List<String> productCategories = [
-    'Vegetables',
-    'Fruits',
-    'Grains',
-    'Dairy',
-    'Herbs',
-    'Nuts',
-    'Honey',
-    'Meat',
-    'Eggs',
-    'Other',
+    'Зеленчуци',
+    'Плодове',
+    'Зърнени',
+    'Млечни',
+    'Билки',
+    'Ядки',
+    'Мед',
+    'Месо',
+    'Яйца',
+    'Други',
   ];
 
-  // ─── Bulgarian Cities ───
-  static const List<String> cities = [
-    'Sofia',
-    'Plovdiv',
-    'Varna',
-    'Burgas',
-    'Ruse',
-    'Stara Zagora',
-    'Pleven',
-    'Sliven',
-    'Dobrich',
-    'Shumen',
-    'Pernik',
-    'Haskovo',
-    'Yambol',
-    'Pazardzhik',
-    'Blagoevgrad',
-    'Veliko Tarnovo',
-    'Vratsa',
-    'Gabrovo',
-    'Asenovgrad',
-    'Vidin',
-    'Kazanlak',
-    'Kyustendil',
-    'Montana',
-    'Dimitrovgrad',
-    'Lovech',
-  ];
-
+  // ─── Български градове ───
   static const Map<String, ({double lat, double lng})> cityLocations = {
-    'Sofia': (lat: 42.6977, lng: 23.3219),
-    'Plovdiv': (lat: 42.1354, lng: 24.7453),
-    'Varna': (lat: 43.2141, lng: 27.9147),
-    'Burgas': (lat: 42.5048, lng: 27.4626),
-    'Ruse': (lat: 43.8356, lng: 25.9657),
-    'Stara Zagora': (lat: 42.4258, lng: 25.6345),
-    'Pleven': (lat: 43.4170, lng: 24.6067),
-    'Sliven': (lat: 42.6817, lng: 26.3229),
-    'Dobrich': (lat: 43.5725, lng: 27.8273),
-    'Shumen': (lat: 43.2712, lng: 26.9361),
-    'Pernik': (lat: 42.6106, lng: 23.0292),
-    'Haskovo': (lat: 41.9344, lng: 25.5555),
-    'Yambol': (lat: 42.4842, lng: 26.5035),
-    'Pazardzhik': (lat: 42.1939, lng: 24.3333),
-    'Blagoevgrad': (lat: 42.0209, lng: 23.0943),
-    'Veliko Tarnovo': (lat: 43.0757, lng: 25.6172),
-    'Vratsa': (lat: 43.2102, lng: 23.5529),
-    'Gabrovo': (lat: 42.8742, lng: 25.3186),
-    'Asenovgrad': (lat: 42.0125, lng: 24.8772),
-    'Vidin': (lat: 43.9961, lng: 22.8679),
-    'Kazanlak': (lat: 42.6244, lng: 25.3929),
-    'Kyustendil': (lat: 42.2839, lng: 22.6911),
-    'Montana': (lat: 43.4125, lng: 23.2250),
-    'Dimitrovgrad': (lat: 42.0641, lng: 25.5721),
-    'Lovech': (lat: 43.1333, lng: 24.7167),
+    'София': (lat: 42.6977, lng: 23.3219),
+    'Пловдив': (lat: 42.1354, lng: 24.7453),
+    'Варна': (lat: 43.2141, lng: 27.9147),
+    'Бургас': (lat: 42.5048, lng: 27.4626),
+    'Русе': (lat: 43.8356, lng: 25.9657),
+    'Стара Загора': (lat: 42.4258, lng: 25.6345),
+    'Плевен': (lat: 43.4170, lng: 24.6067),
+    'Сливен': (lat: 42.6817, lng: 26.3229),
+    'Добрич': (lat: 43.5725, lng: 27.8273),
+    'Шумен': (lat: 43.2712, lng: 26.9361),
+    'Перник': (lat: 42.6106, lng: 23.0292),
+    'Хасково': (lat: 41.9344, lng: 25.5555),
+    'Ямбол': (lat: 42.4842, lng: 26.5035),
+    'Пазарджик': (lat: 42.1939, lng: 24.3333),
+    'Благоевград': (lat: 42.0209, lng: 23.0943),
+    'Велико Търново': (lat: 43.0757, lng: 25.6172),
+    'Враца': (lat: 43.2102, lng: 23.5529),
+    'Габрово': (lat: 42.8742, lng: 25.3186),
+    'Асеновград': (lat: 42.0125, lng: 24.8772),
+    'Видин': (lat: 43.9961, lng: 22.8679),
+    'Казанлък': (lat: 42.6244, lng: 25.3929),
+    'Кюстендил': (lat: 42.2839, lng: 22.6911),
+    'Монтана': (lat: 43.4125, lng: 23.2250),
+    'Димитровград': (lat: 42.0641, lng: 25.5721),
+    'Ловеч': (lat: 43.1333, lng: 24.7167),
   };
 
   static List<String> get cities => cityLocations.keys.toList()..sort();
 
-  // ─── Seasons ───
+  // ─── Сезони ───
   static const List<String> seasons = [
-    'Spring',
-    'Summer',
-    'Autumn',
-    'Winter',
-    'Year-round',
+    'Пролет',
+    'Лято',
+    'Есен',
+    'Зима',
+    'Целогодишно',
   ];
 
-  // ─── Listing Statuses ───
+  // ─── Статуси на обяви ───
   static const String statusDraft = 'draft';
   static const String statusActive = 'active';
   static const String statusThresholdReached = 'threshold_reached';
@@ -94,7 +66,7 @@ class AppConstants {
   static const String statusCancelled = 'cancelled';
   static const String statusCompleted = 'completed';
 
-  // ─── Reservation Statuses ───
+  // ─── Статуси на резервации ───
   static const String reservationPending = 'pending';
   static const String reservationConfirmed = 'confirmed';
   static const String reservationCancelled = 'cancelled';

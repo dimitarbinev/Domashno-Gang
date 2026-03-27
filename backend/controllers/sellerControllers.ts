@@ -70,7 +70,12 @@ export const listingConfirmation = catch_async(async (req: Request, res: Respons
         endDate,
         status: Status.active,
         updatedAt: new Date()
-    })
+    });
+
+    // CRITICAL: Trigger snapshot listener on parent collection
+    await db.collection("users").doc(uid).collection('products').doc(productId).update({
+        lastListingAt: new Date() // Forces parent snapshots to fire
+    });
 
     return res.status(200).json({message: "Listing confirmed successfully"})
 })

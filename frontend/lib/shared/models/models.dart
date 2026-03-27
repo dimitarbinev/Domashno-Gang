@@ -36,7 +36,7 @@ class Seller {
       phone: json['phone'] as String? ?? '',
       email: json['email'] as String? ?? '',
       rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
-      totalReviews: json['totalReviews'] as int? ?? 0,
+      totalReviews: (json['totalReviews'] ?? json['reviewCount'] as num?)?.toInt() ?? 0,
       completedOrders: json['completedOrders'] as int? ?? 0,
       cancelRate: (json['cancelRate'] as num?)?.toDouble() ?? 0.0,
       createdAt: (json['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
@@ -305,6 +305,8 @@ class Reservation {
   final String? productName;
   final String? city;
   final double? pricePerKg;
+  final String? sellerId;
+  final DateTime createdAt;
 
   const Reservation({
     required this.id,
@@ -314,11 +316,13 @@ class Reservation {
     required this.deposit,
     required this.startDate,
     required this.endDate,
+    required this.createdAt,
     this.status = 'pending',
     this.buyerName,
     this.productName,
     this.city,
     this.pricePerKg,
+    this.sellerId,
   });
 
   factory Reservation.fromJson(Map<String, dynamic> json, String id) {
@@ -335,6 +339,8 @@ class Reservation {
       productName: json['productName'] as String?,
       city: json['city'] as String?,
       pricePerKg: (json['pricePerKg'] as num?)?.toDouble(),
+      sellerId: json['sellerId'] as String?,
+      createdAt: _parseDateTime(json['createdAt']),
     );
   }
 
@@ -350,6 +356,8 @@ class Reservation {
     'productName': productName,
     'city': city,
     'pricePerKg': pricePerKg,
+    'sellerId': sellerId,
+    'createdAt': Timestamp.fromDate(createdAt),
   };
 }
 
