@@ -33,7 +33,16 @@ class SellerListingDetailScreen extends ConsumerWidget {
             );
 
         if (listing == null) {
-          return const Scaffold(body: Center(child: Text('Listing not found')));
+          return Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_rounded),
+                onPressed: () => context.go('/seller/dashboard'),
+              ),
+              title: const Text('Listing Details'),
+            ),
+            body: const Center(child: Text('Listing not found')),
+          );
         }
 
         final showGoCancel =

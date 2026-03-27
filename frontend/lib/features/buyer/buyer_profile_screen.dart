@@ -10,8 +10,10 @@ class BuyerProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
+      appBar: AppBar(
+        title: const Text('My Profile'),
+      ),
+      body: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
@@ -118,7 +120,6 @@ class BuyerProfileScreen extends ConsumerWidget {
             ],
           ),
         ),
-      ),
     );
   }
 }
