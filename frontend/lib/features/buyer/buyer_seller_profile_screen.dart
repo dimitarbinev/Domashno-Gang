@@ -118,15 +118,27 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
                     showSellerInfo: false,
                     onTap: () => context.go('/buyer/listing/${l.id}'),
                   )),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
 
-                // Reviews
-                if (reviews.isNotEmpty) ...[
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text('Reviews', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
-                  ),
-                  const SizedBox(height: 12),
+                // Reviews Header & Action
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Reviews', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+                    TextButton.icon(
+                      onPressed: () => _showReviewDialog(context, ref, sellerId),
+                      icon: const Icon(Icons.add_comment_outlined, size: 18, color: AppTheme.accentGreen),
+                      label: const Text('Leave Review', style: TextStyle(color: AppTheme.accentGreen)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                if (reviews.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Text('No reviews yet. Be the first to review!', style: TextStyle(color: AppTheme.textTertiary)),
+                  )
+                else
                   ...reviews.map((r) => Container(
                     margin: const EdgeInsets.only(bottom: 10),
                     padding: const EdgeInsets.all(14),
@@ -146,7 +158,7 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
                       ],
                     ),
                   )),
-                ],
+                const SizedBox(height: 40),
               ],
             ),
           ),
@@ -154,6 +166,92 @@ class BuyerSellerProfileScreen extends ConsumerWidget {
       },
       loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (err, _) => Scaffold(body: Center(child: Text('Error: $err'))),
+    );
+  }
+
+  void _showReviewDialog(BuildContext context, WidgetRef ref, String sellerId) {
+    double selectedRating = 5.0;
+    final commentController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          backgroundColor: AppTheme.cardSurface,
+          title: const Text('Rate Seller', style: TextStyle(color: AppTheme.textPrimary)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('How was your experience?', style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(5, (index) {
+                  return IconButton(
+                    icon: Icon(
+                      index < selectedRating ? Icons.star : Icons.star_border,
+                      color: AppTheme.accentGreen,
+                      size: 32,
+                    ),
+                    onPressed: () => setState(() => selectedRating = index + 1.0),
+                  );
+                }),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: commentController,
+                maxLines: 3,
+                style: const TextStyle(color: AppTheme.textPrimary),
+                decoration: InputDecoration(
+                  hintText: 'Share your feedback...',
+                  hintStyle: const TextStyle(color: AppTheme.textTertiary),
+                  filled: true,
+                  fillColor: Colors.white.withValues(alpha: 0.05),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel', style: TextStyle(color: AppTheme.textTertiary)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.accentGreen,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () async {
+                try {
+                  await ref.read(productServiceProvider).submitReview(
+                        sellerId: sellerId,
+                        rating: selectedRating,
+                        comment: commentController.text,
+                      );
+                  if (ctx.mounted) Navigator.pop(ctx);
+                  ref.invalidate(sellerProfileProvider(sellerId));
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Review submitted successfully!')),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: $e')),
+                    );
+                  }
+                }
+              },
+              child: const Text('Submit'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/theme.dart';
 import '../../shared/models/models.dart';
 import '../../shared/widgets/status_chip.dart';
@@ -39,46 +40,52 @@ class MyReservationsScreen extends ConsumerWidget {
                       final r = reservations[i];
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),
-                        padding: const EdgeInsets.all(16),
                         decoration: glassDecoration(),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+                          onTap: () => context.go('/buyer/reservation/${r.id}'),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  width: 44, height: 44,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-                                    color: AppTheme.cardSurfaceLight,
-                                  ),
-                                  child: const Icon(Icons.eco, color: AppTheme.accentGreen, size: 24),
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 44, height: 44,
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
+                                        color: AppTheme.cardSurfaceLight,
+                                      ),
+                                      child: const Icon(Icons.eco, color: AppTheme.accentGreen, size: 24),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(r.productName?.isNotEmpty == true ? r.productName! : 'Product',
+                                              style: const TextStyle(fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
+                                          Text('${r.city ?? 'Local'} · ${DateFormat('MMM d').format(r.startDate)} - ${DateFormat('MMM d').format(r.endDate)}',
+                                              style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                                        ],
+                                      ),
+                                    ),
+                                    StatusChip(status: r.status, small: true),
+                                  ],
                                 ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(r.productName?.isNotEmpty == true ? r.productName! : 'Product',
-                                          style: const TextStyle(fontWeight: FontWeight.w700, color: AppTheme.textPrimary)),
-                                      Text('${r.city ?? 'Local'} · ${DateFormat('MMM d').format(r.startDate)} - ${DateFormat('MMM d').format(r.endDate)}',
-                                          style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
-                                    ],
-                                  ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    _DetailItem(label: 'Quantity', value: '${r.quantity.toStringAsFixed(0)} kg'),
+                                    _DetailItem(label: 'Deposit', value: '${r.deposit.toStringAsFixed(2)} лв'),
+                                    _DetailItem(label: 'Price', value: '${(r.pricePerKg ?? 0).toStringAsFixed(2)} лв/kg'),
+                                  ],
                                 ),
-                                StatusChip(status: r.status, small: true),
                               ],
                             ),
-                            const SizedBox(height: 12),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                _DetailItem(label: 'Quantity', value: '${r.quantity.toStringAsFixed(0)} kg'),
-                                _DetailItem(label: 'Deposit', value: '${r.deposit.toStringAsFixed(2)} лв'),
-                                _DetailItem(label: 'Price', value: '${(r.pricePerKg ?? 0).toStringAsFixed(2)} лв/kg'),
-                              ],
-                            ),
-                          ],
+                          ),
                         ),
                       );
                     },
