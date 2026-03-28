@@ -300,12 +300,15 @@ class _MetricCard extends StatelessWidget {
 }
 
 // Помощни уиджети (остават същите като логика, но подредени)
-class _NotifBell extends StatelessWidget {
+class _NotifBell extends ConsumerWidget {
   final VoidCallback onTap;
   const _NotifBell({required this.onTap});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(authStateProvider).value;
+    final unreadCount = user != null ? ref.watch(unreadNotificationCountProvider(user.uid)) : 0;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -320,15 +323,16 @@ class _NotifBell extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             const Icon(Icons.notifications_outlined, color: AppTheme.textPrimary, size: 22),
-            Positioned(
-              top: 10,
-              right: 10,
-              child: Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(shape: BoxShape.circle, color: AppTheme.statusCancelled),
+            if (unreadCount > 0)
+              Positioned(
+                top: 10,
+                right: 10,
+                child: Container(
+                  width: 8,
+                  height: 8,
+                  decoration: const BoxDecoration(shape: BoxShape.circle, color: AppTheme.statusCancelled),
+                ),
               ),
-            ),
           ],
         ),
       ),

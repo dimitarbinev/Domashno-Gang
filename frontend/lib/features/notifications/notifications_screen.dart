@@ -200,9 +200,11 @@ IconData notifIcon(String type) {
     case 'go':
       return Icons.check_circle;
     case 'cancel':
-      return Icons.cancel;
+      return Icons.cancel_outlined;
+    case 'like':
+      return Icons.favorite_rounded;
     default:
-      return Icons.notifications;
+      return Icons.notifications_none_rounded;
   }
 }
 
@@ -214,6 +216,8 @@ Color notifColor(String type) {
       return AppTheme.statusGoConfirmed;
     case 'cancel':
       return AppTheme.statusCancelled;
+    case 'like':
+      return Colors.pinkAccent;
     default:
       return AppTheme.accentGreen;
   }
@@ -221,7 +225,7 @@ Color notifColor(String type) {
 
 String timeAgo(DateTime dt) {
   final diff = DateTime.now().difference(dt);
-  if (diff.inMinutes < 1) return 'Току-що';
+  if (diff.inSeconds < 60) return 'Тъкмо сега';
   if (diff.inMinutes < 60) return 'Преди ${diff.inMinutes} мин.';
   if (diff.inHours < 24) return 'Преди ${diff.inHours} ч.';
   return 'Преди ${diff.inDays} дни';
