@@ -254,7 +254,10 @@ class _BuyerListingDetailScreenState extends ConsumerState<BuyerListingDetailScr
                                 padding: const EdgeInsets.all(16),
                                 decoration: glassDecoration(),
                                 child: Column(
-                                  children: reservations.take(5).map((r) => Padding(
+                                  children: reservations
+                                      .where((r) => r.status != 'cancelled')
+                                      .take(5)
+                                      .map((r) => Padding(
                                     padding: const EdgeInsets.only(bottom: 12),
                                     child: Row(
                                       children: [

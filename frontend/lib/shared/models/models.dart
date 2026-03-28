@@ -328,16 +328,35 @@ class Reservation {
   });
 
   factory Reservation.fromJson(Map<String, dynamic> json, String id) {
-    final rawStatus = json['status'] as String?;
+    String rawStatus;
+    if (json['status'] is int) {
+      switch (json['status'] as int) {
+        case 3:
+          rawStatus = 'cancelled';
+          break;
+        default:
+          rawStatus = 'active';
+      }
+    } else {
+      final s = json['status'] as String? ?? 'active';
+      if (s == '3') {
+        rawStatus = 'cancelled';
+      } else {
+        rawStatus = s;
+      }
+    }
+
     return Reservation(
       id: id,
       buyerId: json['buyerId'] as String? ?? '',
       listingId: json['listingId'] as String? ?? '',
       quantity: (json['quantity'] as num?)?.toDouble() ?? 0.0,
       deposit: (json['deposit'] as num?)?.toDouble() ?? 0.0,
-      startDate: _parseDateTime(json['startDate'], _parseDateTime(json['attendanceDate'])),
-      endDate: _parseDateTime(json['endDate'], _parseDateTime(json['attendanceDate'])),
-      status: rawStatus == 'pending' ? 'active' : (rawStatus ?? 'active'),
+      startDate: _parseDateTime(
+          json['startDate'], _parseDateTime(json['attendanceDate'])),
+      endDate: _parseDateTime(
+          json['endDate'], _parseDateTime(json['attendanceDate'])),
+      status: rawStatus == 'pending' ? 'active' : rawStatus,
       buyerName: json['buyerName'] as String?,
       productName: json['productName'] as String?,
       city: json['city'] as String? ??

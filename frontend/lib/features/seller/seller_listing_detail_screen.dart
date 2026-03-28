@@ -215,7 +215,7 @@ class SellerListingDetailScreen extends ConsumerWidget {
                 reservationsAsync.when(
                   data: (reservations) {
                     final visibleReservations = reservations
-                        .where((r) => r.status == 'active' || r.status == 'confirmed')
+                        .where((r) => r.status != 'cancelled')
                         .toList();
 
                     return Container(
