@@ -92,17 +92,25 @@ class _BuyerHomeScreenState extends ConsumerState<BuyerHomeScreen> {
                       alignment: Alignment.center,
                       children: [
                         const Icon(Icons.notifications_outlined, color: AppTheme.textPrimary, size: 22),
-                        Positioned(
-                          top: 10,
-                          right: 10,
-                          child: Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppTheme.statusCancelled,
-                            ),
-                          ),
+                        Consumer(
+                          builder: (context, ref, child) {
+                            final user = ref.watch(authStateProvider).value;
+                            if (user == null) return const SizedBox.shrink();
+                            final unreadCount = ref.watch(unreadNotificationCountProvider(user.uid));
+                            if (unreadCount == 0) return const SizedBox.shrink();
+                            return Positioned(
+                              top: 10,
+                              right: 10,
+                              child: Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppTheme.statusCancelled,
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),

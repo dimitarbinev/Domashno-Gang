@@ -335,20 +335,19 @@ final sellerReviewsProvider = StreamProvider.family<List<Review>, String>((
 // ─── Notifications ───
 final notificationsProvider =
     StreamProvider.family<List<AppNotification>, String>((ref, userId) {
-      return ref
-          .watch(firestoreProvider)
-          .collection('notifications')
-          .where('userId', isEqualTo: userId)
-          .orderBy('createdAt', descending: true)
-          .limit(50)
-          .snapshots()
-          .map(
-            (snap) =>
-                snap.docs
-                    .map((d) => AppNotification.fromJson(d.data(), d.id))
-                    .toList(),
-          );
-    });
+  return ref
+      .watch(firestoreProvider)
+      .collection('notifications')
+      .where('userId', isEqualTo: userId)
+      .limit(50)
+      .snapshots()
+      .map((snap) {
+    final list =
+        snap.docs.map((d) => AppNotification.fromJson(d.data(), d.id)).toList();
+    list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return list;
+  });
+});
 
 // ─── Seller's Route Info (Cities + Reservations) ───
 class SellerRouteInfo {

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:flutter/foundation.dart';
 import '../models/models.dart';
 
 class ProductService {
@@ -353,6 +354,23 @@ class ProductService {
       await docRef.set({
         'savedAt': FieldValue.serverTimestamp(),
       });
+
+      // Send notification to the seller
+      try {
+        final buyerDoc = await firestore.collection('users').doc(user.uid).get();
+        final buyerName = buyerDoc.data()?['name'] ?? user.displayName ?? 'Някой';
+
+        await firestore.collection('notifications').add({
+          'userId': sellerId,
+          'title': 'Нов интерес!',
+          'body': '$buyerName хареса вашия профил.',
+          'type': 'like',
+          'createdAt': FieldValue.serverTimestamp(),
+          'read': false,
+        });
+      } catch (e) {
+        debugPrint('Notification error: $e');
+      }
     }
   }
 
